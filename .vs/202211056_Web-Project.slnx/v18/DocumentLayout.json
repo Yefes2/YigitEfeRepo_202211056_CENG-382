@@ -1,12 +1,23 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\lenovo\\source\\repos\\202211056_Web-Project\\",
+  "WorkspaceRootPath": "C:\\Users\\lenovo\\source\\repos\\Yefes2\\YigitEfeRepo_202211056_CENG-382\\",
   "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": []
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
