@@ -4,44 +4,125 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - GrubBytes</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/GrubBytes.styles.css" asp-append-version="true" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">GrubBytes</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
+
+    <!-- NAVBAR -->
+    <nav class="gb-navbar">
+        <div class="gb-navbar__brand">
+            <span class="gb-navbar__dot"></span>
+            <a href="/" class="gb-navbar__logo">Grub<span>Bytes</span></a>
+        </div>
+        <div class="gb-navbar__links">
+            <a href="/Menu">Menu</a>
+            <a href="/About">About</a>
+        </div>
+        <div class="gb-navbar__auth">
+            @if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                <span class="gb-navbar__user">@User.Identity.Name</span>
+                <a href="/Account/Logout" class="gb-btn gb-btn--outline">Logout</a>
+            }
+            else
+            {
+                <a href="/Account/Login" class="gb-btn gb-btn--outline">Login</a>
+                <a href="/Account/Register" class="gb-btn gb-btn--primary">Sign Up</a>
+            }
+        </div>
+    </nav>
+
+    <!-- PAGE WRAPPER -->
+    <div class="gb-wrapper">
+
+        <!-- SIDEBAR -->
+        <aside class="gb-sidebar">
+            <div class="gb-sidebar__section">
+                <p class="gb-sidebar__label">General</p>
+                <a href="/" class="gb-sidebar__link">
+                    <span class="gb-sidebar__icon">&#9632;</span> Home
+                </a>
+                <a href="/Menu" class="gb-sidebar__link">
+                    <span class="gb-sidebar__icon">&#9632;</span> Menu
+                </a>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+
+            @if (User.IsInRole("Admin"))
+            {
+                <div class="gb-sidebar__section">
+                    <p class="gb-sidebar__label">Admin</p>
+                    <a href="/Admin/Dashboard" class="gb-sidebar__link">
+                        <span class="gb-sidebar__icon">&#9632;</span> Dashboard
+                    </a>
+                    <a href="/Admin/Users" class="gb-sidebar__link">
+                        <span class="gb-sidebar__icon">&#9632;</span> Users
+                    </a>
+                    <a href="/Admin/Logs" class="gb-sidebar__link">
+                        <span class="gb-sidebar__icon">&#9632;</span> Logs
+                    </a>
+                    <a href="/Admin/Orders" class="gb-sidebar__link">
+                        <span class="gb-sidebar__icon">&#9632;</span> Orders
+                    </a>
+                </div>
+            }
+
+            @if (User.IsInRole("Caterer"))
+            {
+                <div class="gb-sidebar__section">
+                    <p class="gb-sidebar__label">Caterer</p>
+                    <a href="/Caterer/Dashboard" class="gb-sidebar__link">
+                        <span class="gb-sidebar__icon">&#9632;</span> Dashboard
+                    </a>
+                    <a href="/Caterer/Menu" class="gb-sidebar__link">
+                        <span class="gb-sidebar__icon">&#9632;</span> My Menu
+                    </a>
+                    <a href="/Caterer/Orders" class="gb-sidebar__link">
+                        <span class="gb-sidebar__icon">&#9632;</span> Orders
+                    </a>
+                </div>
+            }
+
+            @if (User.IsInRole("User"))
+            {
+                <div class="gb-sidebar__section">
+                    <p class="gb-sidebar__label">My Account</p>
+                    <a href="/User/Dashboard" class="gb-sidebar__link">
+                        <span class="gb-sidebar__icon">&#9632;</span> Dashboard
+                    </a>
+                    <a href="/User/Orders" class="gb-sidebar__link">
+                        <span class="gb-sidebar__icon">&#9632;</span> My Orders
+                    </a>
+                    <a href="/Cart" class="gb-sidebar__link">
+                        <span class="gb-sidebar__icon">&#9632;</span> Cart
+                    </a>
+                </div>
+            }
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="gb-main">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - GrubBytes - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <!-- FOOTER -->
+    <footer class="gb-footer">
+        <div class="gb-footer__brand">
+            <span class="gb-footer__logo">Grub<span>Bytes</span></span>
+            <p>Your neighborhood, your flavor.</p>
+        </div>
+        <div class="gb-footer__links">
+            <a href="/Menu">Menu</a>
+            <a href="/About">About</a>
+            <a href="/Contact">Contact</a>
+        </div>
+        <div class="gb-footer__copy">
+            &copy; 2026 GrubBytes. All rights reserved.
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
