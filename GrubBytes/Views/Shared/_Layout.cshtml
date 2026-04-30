@@ -21,6 +21,10 @@
             <a href="/About">About</a>
         </div>
         <div class="gb-navbar__auth">
+            @if (User.IsInRole("User"))
+            {
+                <a href="/Cart" class="gb-btn gb-btn--outline">Cart</a>
+            }
             @if (User.Identity != null && User.Identity.IsAuthenticated)
             {
                 <span class="gb-navbar__user">@User.Identity.Name</span>
@@ -93,7 +97,7 @@
                     <a href="/User/Dashboard" class="gb-sidebar__link">
                         <span class="gb-sidebar__icon">&#9632;</span> Dashboard
                     </a>
-                    <a href="/User/Orders" class="gb-sidebar__link">
+                    <a href="/Cart/OrderHistory" class="gb-sidebar__link">
                         <span class="gb-sidebar__icon">&#9632;</span> My Orders
                     </a>
                     <a href="/Cart" class="gb-sidebar__link">

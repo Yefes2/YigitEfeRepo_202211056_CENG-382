@@ -1,0 +1,64 @@
+﻿@model List<GrubBytes.Models.CartItem>
+@{
+    ViewData["Title"] = "Your Cart";
+}
+
+<div class="gb-page-header">
+    <h1 class="gb-page-title">Your Cart</h1>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="gb-card" style="text-align:center; padding:3rem;">
+        <p style="color:var(--gb-muted)">Your cart is empty.</p>
+        <a href="/" class="gb-btn gb-btn--primary" style="margin-top:1rem">Browse Menu</a>
+    </div>
+}
+else
+{
+    <div style="display:grid; grid-template-columns: 1fr 320px; gap:1.5rem; align-items:start;">
+        <div>
+            @foreach (var item in Model)
+            {
+                <div class="gb-card" style="margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center; gap:1rem;">
+                    <div>
+                        <h3 style="font-family:var(--font-display); font-size:1.2rem;">@item.Title</h3>
+                        <p style="color:var(--gb-muted); font-size:0.85rem;">₺@item.UnitPrice.ToString("0.00") each</p>
+                    </div>
+
+                    <div style="display:flex; align-items:center; gap:0.75rem;">
+                        <form asp-action="UpdateQuantity" method="post" style="display:flex; align-items:center; gap:0.5rem;">
+                            <input type="hidden" name="menuItemId" value="@item.MenuItemId" />
+                            <input type="number" name="quantity" value="@item.Quantity" min="1" max="99"
+                                   class="gb-input" style="width:70px; text-align:center;" />
+                            <button type="submit" class="gb-btn gb-btn--outline">Update</button>
+                        </form>
+
+                        <p style="font-family:var(--font-display); font-size:1.3rem; color:var(--gb-gold);">
+                            ₺@item.ItemTotal.ToString("0.00")
+                        </p>
+
+                        <form asp-action="Remove" method="post">
+                            <input type="hidden" name="menuItemId" value="@item.MenuItemId" />
+                            <button type="submit" class="gb-btn gb-btn--outline"
+                                    style="border-color:#ff4444; color:#ff6666;">
+                                Remove
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="gb-card" style="position:sticky; top:80px;">
+            <h3 style="font-family:var(--font-display); font-size:1.4rem; margin-bottom:1rem;">Order Summary</h3>
+            <div style="display:flex; justify-content:space-between; margin-bottom:1rem; padding-bottom:1rem; border-bottom:1px solid var(--gb-border);">
+                <span style="color:var(--gb-muted)">Total</span>
+                <span style="font-family:var(--font-display); font-size:1.5rem; color:var(--gb-orange);">
+                    ₺@ViewBag.Total.ToString("0.00")
+                </span>
+            </div>
+            <a asp-action="Checkout" class="gb-btn gb-btn--primary gb-btn--full">Proceed to Payment</a>
+        </div>
+    </div>
+}

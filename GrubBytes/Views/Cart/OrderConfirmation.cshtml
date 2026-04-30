@@ -1,0 +1,35 @@
+﻿@model GrubBytes.Models.Order
+@{
+    ViewData["Title"] = "Order Confirmed";
+}
+
+<div style="display:flex; justify-content:center; align-items:center; min-height:60vh;">
+    <div class="gb-card" style="max-width:520px; width:100%; text-align:center; padding:2.5rem;">
+        <div style="width:60px; height:60px; background:#2ECC7122; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1.25rem;">
+            <span style="color:var(--gb-green); font-size:1.5rem;">✓</span>
+        </div>
+
+        <h2 style="font-family:var(--font-display); font-size:2rem; margin-bottom:0.5rem;">Order Confirmed!</h2>
+        <p style="color:var(--gb-muted); margin-bottom:1.5rem;">
+            Order #@Model.Id · @Model.CreatedAt.ToString("dd MMM yyyy, HH:mm")
+        </p>
+
+        <div style="text-align:left; margin-bottom:1.5rem;">
+            @foreach (var item in Model.OrderItems)
+            {
+                <div style="display:flex; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid var(--gb-border); font-size:0.875rem;">
+                    <span>@item.MenuItem?.Title × @item.Quantity</span>
+                    <span style="color:var(--gb-gold);">₺@((item.UnitPrice * item.Quantity).ToString("0.00"))</span>
+                </div>
+            }
+            <div style="display:flex; justify-content:space-between; padding:0.75rem 0; font-weight:500;">
+                <span>Total Paid</span>
+                <span style="font-family:var(--font-display); font-size:1.3rem; color:var(--gb-orange);">
+                    ₺@Model.TotalAmount.ToString("0.00")
+                </span>
+            </div>
+        </div>
+
+        <a href="/" class="gb-btn gb-btn--primary gb-btn--full">Back to Menu</a>
+    </div>
+</div>

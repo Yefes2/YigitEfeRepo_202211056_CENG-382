@@ -27,7 +27,11 @@ else
                 </div>
                 <div class="gb-menu-card__footer">
                     <span class="gb-menu-card__price">₺@item.Price.ToString("0.00")</span>
-                    <button class="gb-btn gb-btn--primary">Order</button>
+                    <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                        <input type="hidden" name="menuItemId" value="@item.Id" />
+                        <input type="hidden" name="quantity" value="1" />
+                        <button type="submit" class="gb-btn gb-btn--primary">Add to Cart</button>
+                    </form>
                 </div>
             </div>
         }

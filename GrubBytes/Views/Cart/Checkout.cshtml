@@ -1,0 +1,68 @@
+﻿@model GrubBytes.ViewModels.PaymentViewModel
+@{
+    ViewData["Title"] = "Payment";
+}
+
+<div class="gb-page-header">
+    <h1 class="gb-page-title">Payment</h1>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 340px; gap:1.5rem; align-items:start;">
+
+    <div class="gb-card">
+        <h3 style="font-family:var(--font-display); font-size:1.4rem; margin-bottom:1.25rem;">Card Details</h3>
+        <p style="color:var(--gb-muted); font-size:0.8rem; margin-bottom:1.25rem;">
+            This is a simulation. Do not enter real card information.
+        </p>
+
+        <form asp-action="PlaceOrder" method="post">
+            <div asp-validation-summary="ModelOnly" class="gb-error"></div>
+
+            <div class="gb-form-group">
+                <label asp-for="CardHolder">Cardholder Name</label>
+                <input asp-for="CardHolder" class="gb-input" placeholder="John Doe" />
+                <span asp-validation-for="CardHolder" class="gb-field-error"></span>
+            </div>
+
+            <div class="gb-form-group">
+                <label asp-for="CardNumber">Card Number</label>
+                <input asp-for="CardNumber" class="gb-input" placeholder="1234567890123456" maxlength="16" />
+                <span asp-validation-for="CardNumber" class="gb-field-error"></span>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                <div class="gb-form-group">
+                    <label asp-for="Expiry">Expiry</label>
+                    <input asp-for="Expiry" class="gb-input" placeholder="MM/YY" />
+                    <span asp-validation-for="Expiry" class="gb-field-error"></span>
+                </div>
+                <div class="gb-form-group">
+                    <label asp-for="CVV">CVV</label>
+                    <input asp-for="CVV" class="gb-input" placeholder="123" maxlength="3" />
+                    <span asp-validation-for="CVV" class="gb-field-error"></span>
+                </div>
+            </div>
+
+            <button type="submit" class="gb-btn gb-btn--primary gb-btn--full" style="margin-top:0.5rem;">
+                Confirm Payment
+            </button>
+        </form>
+    </div>
+
+    <div class="gb-card" style="position:sticky; top:80px;">
+        <h3 style="font-family:var(--font-display); font-size:1.4rem; margin-bottom:1rem;">Order Summary</h3>
+        @foreach (var item in ViewBag.Cart)
+        {
+            <div style="display:flex; justify-content:space-between; margin-bottom:0.6rem; font-size:0.875rem;">
+                <span>@item.Title × @item.Quantity</span>
+                <span style="color:var(--gb-gold);">₺@item.ItemTotal.ToString("0.00")</span>
+            </div>
+        }
+        <div style="border-top:1px solid var(--gb-border); margin-top:1rem; padding-top:1rem; display:flex; justify-content:space-between;">
+            <span style="color:var(--gb-muted)">Total</span>
+            <span style="font-family:var(--font-display); font-size:1.5rem; color:var(--gb-orange);">
+                ₺@ViewBag.Total.ToString("0.00")
+            </span>
+        </div>
+    </div>
+</div>

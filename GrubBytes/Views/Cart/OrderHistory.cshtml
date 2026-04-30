@@ -1,0 +1,66 @@
+﻿@model List<GrubBytes.Models.Order>
+@{
+    ViewData["Title"] = "Order History";
+}
+
+<div class="gb-page-header">
+    <h1 class="gb-page-title">Order History</h1>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="gb-card" style="text-align:center; padding:3rem;">
+        <p style="color:var(--gb-muted)">No orders yet.</p>
+        <a href="/" class="gb-btn gb-btn--primary" style="margin-top:1rem">Browse Menu</a>
+    </div>
+}
+else
+{
+    @foreach (var order in Model)
+    {
+        <div class="gb-card" style="margin-bottom:1rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <div>
+                    <span style="font-family:var(--font-display); font-size:1.2rem;">
+                        Order #@order.Id
+                    </span>
+                    <span style="color:var(--gb-muted); font-size:0.82rem; margin-left:0.75rem;">
+                        @order.CreatedAt.ToString("dd MMM yyyy, HH:mm")
+                    </span>
+                </div>
+                <div style="display:flex; align-items:center; gap:1rem;">
+                    <span class="gb-badge @(order.Status == "Completed" ? "gb-badge--completed" : "gb-badge--pending")">
+                        @order.Status
+                    </span>
+                    <span style="font-family:var(--font-display); font-size:1.3rem; color:var(--gb-orange);">
+                        ₺@order.TotalAmount.ToString("0.00")
+                    </span>
+                </div>
+            </div>
+
+            <table class="gb-table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Qty</th>
+                        <th>Unit Price</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in order.OrderItems)
+                    {
+                        <tr>
+                            <td>@item.MenuItem?.Title</td>
+                            <td>@item.Quantity</td>
+                            <td>₺@item.UnitPrice.ToString("0.00")</td>
+                            <td style="color:var(--gb-gold);">
+                                ₺@((item.UnitPrice * item.Quantity).ToString("0.00"))
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+}
