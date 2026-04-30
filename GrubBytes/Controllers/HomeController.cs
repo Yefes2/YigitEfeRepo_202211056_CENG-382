@@ -1,24 +1,26 @@
-using System.Diagnostics;
+using GrubBytes.Data;
 using Microsoft.AspNetCore.Mvc;
-using GrubBytes.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace GrubBytes.Controllers;
-
-public class HomeController : Controller
+namespace GrubBytes.Controllers
 {
-    public IActionResult Index()
+    public class HomeController : Controller
     {
-        return View();
-    }
+        private readonly AppDbContext _db;
 
-    public IActionResult Privacy()
-    {
-        return View();
-    }
+        public HomeController(AppDbContext db)
+        {
+            _db = db;
+        }
 
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        public async Task<IActionResult> Index()
+        {
+            var menuItems = await _db.MenuItems
+                .Include(m => m.Caterer)
+                .Where(m => m.IsAvailable)
+                .ToListAsync();
+
+            return View(menuItems);
+        }
     }
 }

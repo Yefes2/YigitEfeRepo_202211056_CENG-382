@@ -1,0 +1,47 @@
+﻿@model IEnumerable<GrubBytes.Models.MenuItem>
+@{
+    ViewData["Title"] = "My Menu";
+}
+
+<div class="gb-page-header">
+    <h1 class="gb-page-title">My Menu</h1>
+    <a asp-action="CreateMenuItem" class="gb-btn gb-btn--primary">+ Add Item</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="gb-card" style="text-align:center; padding: 3rem;">
+        <p style="color: var(--gb-muted)">No menu items yet.</p>
+        <a asp-action="CreateMenuItem" class="gb-btn gb-btn--primary" style="margin-top:1rem">
+            Create your first item
+        </a>
+    </div>
+}
+else
+{
+    <table class="gb-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Title</td>
+                    <td>@item.Description</td>
+                    <td>₺@item.Price.ToString("0.00")</td>
+                    <td>
+                        <span class="gb-badge @(item.IsAvailable ? "gb-badge--completed" : "gb-badge--cancelled")">
+                            @(item.IsAvailable ? "Available" : "Unavailable")
+                        </span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

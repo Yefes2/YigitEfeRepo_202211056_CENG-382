@@ -24,7 +24,9 @@
             @if (User.Identity != null && User.Identity.IsAuthenticated)
             {
                 <span class="gb-navbar__user">@User.Identity.Name</span>
-                <a href="/Account/Logout" class="gb-btn gb-btn--outline">Logout</a>
+                <form asp-controller="Account" asp-action="Logout" method="post" style="display:inline">
+                    <button type="submit" class="gb-btn gb-btn--outline">Logout</button>
+                </form>
             }
             else
             {

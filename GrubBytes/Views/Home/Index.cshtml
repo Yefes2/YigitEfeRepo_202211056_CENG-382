@@ -1,8 +1,35 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model IEnumerable<GrubBytes.Models.MenuItem>
+@{
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="gb-page-header">
+    <h1 class="gb-page-title">Today's Menu</h1>
+    <p class="gb-page-sub">Fresh from your neighborhood caterers</p>
 </div>
+
+@if (!Model.Any())
+{
+    <div class="gb-card" style="text-align:center; padding: 3rem;">
+        <p style="color: var(--gb-muted)">No menu items available yet. Check back soon!</p>
+    </div>
+}
+else
+{
+    <div class="gb-menu-grid">
+        @foreach (var item in Model)
+        {
+            <div class="gb-card gb-menu-card">
+                <div class="gb-menu-card__body">
+                    <p class="gb-menu-card__caterer">@item.Caterer?.BusinessName</p>
+                    <h3 class="gb-menu-card__title">@item.Title</h3>
+                    <p class="gb-menu-card__desc">@item.Description</p>
+                </div>
+                <div class="gb-menu-card__footer">
+                    <span class="gb-menu-card__price">₺@item.Price.ToString("0.00")</span>
+                    <button class="gb-btn gb-btn--primary">Order</button>
+                </div>
+            </div>
+        }
+    </div>
+}

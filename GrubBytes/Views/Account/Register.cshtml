@@ -1,0 +1,45 @@
+﻿@model GrubBytes.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="gb-auth-wrap">
+    <div class="gb-card gb-auth-card">
+        <h2 class="gb-auth-title">Create Account</h2>
+        <p class="gb-auth-sub">Join GrubBytes today</p>
+
+        <form asp-action="Register" method="post">
+            <div asp-validation-summary="ModelOnly" class="gb-error"></div>
+
+            <div class="gb-form-group">
+                <label asp-for="FullName">Full Name</label>
+                <input asp-for="FullName" class="gb-input" placeholder="John Doe" />
+                <span asp-validation-for="FullName" class="gb-field-error"></span>
+            </div>
+
+            <div class="gb-form-group">
+                <label asp-for="Email">Email</label>
+                <input asp-for="Email" class="gb-input" placeholder="you@example.com" />
+                <span asp-validation-for="Email" class="gb-field-error"></span>
+            </div>
+
+            <div class="gb-form-group">
+                <label asp-for="Password">Password</label>
+                <input asp-for="Password" type="password" class="gb-input" placeholder="••••••" />
+                <span asp-validation-for="Password" class="gb-field-error"></span>
+            </div>
+
+            <div class="gb-form-group">
+                <label asp-for="ConfirmPassword">Confirm Password</label>
+                <input asp-for="ConfirmPassword" type="password" class="gb-input" placeholder="••••••" />
+                <span asp-validation-for="ConfirmPassword" class="gb-field-error"></span>
+            </div>
+
+            <button type="submit" class="gb-btn gb-btn--primary gb-btn--full">Create Account</button>
+        </form>
+
+        <p class="gb-auth-footer">
+            Already have an account? <a asp-action="Login">Sign in</a>
+        </p>
+    </div>
+</div>

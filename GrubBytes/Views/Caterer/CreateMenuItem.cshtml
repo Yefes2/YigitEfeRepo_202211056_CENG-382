@@ -1,0 +1,38 @@
+﻿@model GrubBytes.ViewModels.MenuItemViewModel
+@{
+    ViewData["Title"] = "Add Menu Item";
+}
+
+<div class="gb-page-header">
+    <h1 class="gb-page-title">Add Menu Item</h1>
+</div>
+
+<div class="gb-card" style="max-width: 520px;">
+    <form asp-action="CreateMenuItem" method="post">
+        <div asp-validation-summary="ModelOnly" class="gb-error"></div>
+
+        <div class="gb-form-group">
+            <label asp-for="Title">Item Name</label>
+            <input asp-for="Title" class="gb-input" placeholder="e.g. Spicy Chicken Wrap" />
+            <span asp-validation-for="Title" class="gb-field-error"></span>
+        </div>
+
+        <div class="gb-form-group">
+            <label asp-for="Description">Description</label>
+            <textarea asp-for="Description" class="gb-input" rows="3"
+                      placeholder="Describe the item..."></textarea>
+            <span asp-validation-for="Description" class="gb-field-error"></span>
+        </div>
+
+        <div class="gb-form-group">
+            <label asp-for="Price">Price (₺)</label>
+            <input asp-for="Price" class="gb-input" type="number" step="0.01" placeholder="0.00" />
+            <span asp-validation-for="Price" class="gb-field-error"></span>
+        </div>
+
+        <div style="display:flex; gap:0.75rem; margin-top:0.5rem;">
+            <button type="submit" class="gb-btn gb-btn--primary">Save Item</button>
+            <a asp-action="Menu" class="gb-btn gb-btn--outline">Cancel</a>
+        </div>
+    </form>
+</div>  
