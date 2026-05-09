@@ -22,5 +22,15 @@ namespace GrubBytes.Controllers
 
             return View(menuItems);
         }
+
+        public async Task<IActionResult> NearMe()
+        {
+            var caterers = await _db.CatererProfiles
+                .Include(c => c.MenuItems)
+                .Where(c => c.MenuItems.Any(m => m.IsAvailable))
+                .ToListAsync();
+
+            return View(caterers);
+        }
     }
 }

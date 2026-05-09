@@ -31,6 +31,10 @@ builder.Services.AddSession(options =>
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CartService>();
+builder.Services.AddScoped<LogService>();
+builder.Services.AddScoped<EmailService>();
+
+
 
 var app = builder.Build();
 
@@ -96,13 +100,16 @@ using (var scope = app.Services.CreateScope())
         };
         await userManager.CreateAsync(caterer, "Caterer123!");
         await userManager.AddToRoleAsync(caterer, "Caterer");
+        
 
         // Create caterer profile
         var profile = new GrubBytes.Models.CatererProfile
         {
             UserId = caterer.Id,
             BusinessName = "Street Kings",
-            Description = "Bold street food done right."
+            Description = "Bold street food done right.",
+            Latitude = 39.9334,
+            Longitude = 32.8597
         };
         scope.ServiceProvider.GetRequiredService<GrubBytes.Data.AppDbContext>()
             .CatererProfiles.Add(profile);

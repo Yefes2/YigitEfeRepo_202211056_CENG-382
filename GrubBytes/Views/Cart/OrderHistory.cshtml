@@ -39,6 +39,7 @@ else
             </div>
 
             <table class="gb-table">
+
                 <thead>
                     <tr>
                         <th>Item</th>
@@ -61,6 +62,13 @@ else
                     }
                 </tbody>
             </table>
+            @if (order.Status == "Completed")
+            {
+                <div style="margin-top:0.75rem;">
+                    <a asp-action="Rate" asp-route-orderId="@order.Id"
+                       class="gb-btn gb-btn--outline">Rate This Order</a>
+                </div>
+            }
         </div>
     }
 }

@@ -1,4 +1,5 @@
 ﻿using GrubBytes.Models;
+using GrubBytes.Services;
 using GrubBytes.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -10,20 +11,24 @@ namespace GrubBytes.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly LogService _logService;
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            RoleManager<IdentityRole> roleManager)
+            RoleManager<IdentityRole> roleManager,
+            LogService logService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _logService = logService;
         }
 
         [HttpGet]
         public IActionResult Register() => View();
 
+        [HttpPost]
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
@@ -47,18 +52,29 @@ namespace GrubBytes.Controllers
 
                 await _userManager.AddToRoleAsync(user, "User");
                 await _signInManager.SignInAsync(user, isPersistent: false);
+
+                // ← ADD THIS
+                await _logService.LogAsync("Register", $"New user registered: {model.Email}", user.Id);
+
                 return RedirectToAction("Index", "Home");
             }
+            else
+            {
+                // ← AND THIS
+                await _logService.LogAsync("Register",
+                    $"Failed registration attempt for {model.Email}.", severity: "Warning");
 
-            foreach (var error in result.Errors)
-                ModelState.AddModelError(string.Empty, error.Description);
+                foreach (var error in result.Errors)
+                    ModelState.AddModelError(string.Empty, error.Description);
 
-            return View(model);
+                return View(model);
+            }
         }
 
         [HttpGet]
         public IActionResult Login() => View();
 
+        [HttpPost]
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
@@ -70,8 +86,11 @@ namespace GrubBytes.Controllers
             if (result.Succeeded)
             {
                 var user = await _userManager.FindByEmailAsync(model.Email);
-                var roles = await _userManager.GetRolesAsync(user!);
 
+                
+                await _logService.LogAsync("Login", $"User {model.Email} logged in successfully.", user!.Id);
+
+                var roles = await _userManager.GetRolesAsync(user!);
                 if (roles.Contains("Admin"))
                     return RedirectToAction("Dashboard", "Admin");
                 else if (roles.Contains("Caterer"))
@@ -79,6 +98,10 @@ namespace GrubBytes.Controllers
                 else
                     return RedirectToAction("Index", "Home");
             }
+
+            
+            await _logService.LogAsync("Login",
+                $"Failed login attempt for {model.Email}.", severity: "Warning");
 
             ModelState.AddModelError(string.Empty, "Invalid email or password.");
             return View(model);

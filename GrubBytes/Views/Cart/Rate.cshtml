@@ -1,0 +1,79 @@
+﻿@{
+    ViewData["Title"] = "Rate Your Order";
+}
+
+<div class="gb-page-header">
+    <h1 class="gb-page-title">Rate Your Order</h1>
+</div>
+
+<div class="gb-card" style="max-width:520px;">
+    <form asp-action="Rate" method="post">
+        <input type="hidden" name="orderId" value="@ViewBag.Order.Id" />
+
+        <div class="gb-form-group">
+            <label>Food Rating (1-5)</label>
+            <div class="gb-star-group" id="menuStars">
+                @for (int i = 1; i <= 5; i++)
+                {
+                    <span class="gb-star" data-value="@i" onclick="setRating('menuItemScore', @i)">★</span>
+                }
+            </div>
+            <input type="hidden" name="menuItemScore" id="menuItemScore" value="5" />
+        </div>
+
+        <div class="gb-form-group">
+            <label>Caterer Rating (1-5)</label>
+            <div class="gb-star-group" id="catererStars">
+                @for (int i = 1; i <= 5; i++)
+                {
+                    <span class="gb-star" data-value="@i" onclick="setRating('catererScore', @i)">★</span>
+                }
+            </div>
+            <input type="hidden" name="catererScore" id="catererScore" value="5" />
+        </div>
+
+        <div class="gb-form-group">
+            <label>Comment</label>
+            <textarea name="comment" class="gb-input" rows="3"
+                      placeholder="Tell us about your experience..."></textarea>
+        </div>
+
+        <button type="submit" class="gb-btn gb-btn--primary">Submit Rating</button>
+    </form>
+</div>
+
+<style>
+    .gb-star-group {
+        display: flex;
+        gap: 0.5rem;
+        margin: 0.25rem 0;
+    }
+
+    .gb-star {
+        font-size: 1.8rem;
+        color: var(--gb-gold);
+        cursor: pointer;
+        transition: transform 0.1s;
+    }
+
+        .gb-star:hover {
+            transform: scale(1.2);
+        }
+
+        .gb-star.inactive {
+            color: var(--gb-border);
+        }
+</style>
+
+<script>
+    function setRating(field, value) {
+        document.getElementById(field).value = value;
+        const group = field === 'menuItemScore' ? 'menuStars' : 'catererStars';
+        document.querySelectorAll(`#${group} .gb-star`).forEach((star, i) => {
+            star.classList.toggle('inactive', i >= value);
+        });
+    }
+    // Initialize all stars as active
+    setRating('menuItemScore', 5);
+    setRating('catererScore', 5);
+</script>

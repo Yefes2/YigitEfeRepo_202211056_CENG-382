@@ -1,0 +1,43 @@
+﻿@model List<GrubBytes.Models.Log>
+@{
+    ViewData["Title"] = "System Logs";
+}
+
+<div class="gb-page-header">
+    <h1 class="gb-page-title">System Logs</h1>
+</div>
+
+<div class="gb-card">
+    <table class="gb-table">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Event</th>
+                <th>User</th>
+                <th>Message</th>
+                <th>Severity</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var log in Model)
+            {
+                <tr>
+                    <td style="color:var(--gb-muted); font-size:0.8rem; white-space:nowrap;">
+                        @log.CreatedAt.ToString("dd MMM HH:mm:ss")
+                    </td>
+                    <td>
+                        <span class="gb-badge gb-badge--pending">@log.EventType</span>
+                    </td>
+                    <td style="font-size:0.85rem;">@(log.User?.Email ?? "System")</td>
+                    <td style="font-size:0.85rem;">@log.Message</td>
+                    <td>
+                        <span class="gb-badge @(log.Severity == "Error" ? "gb-badge--cancelled" :
+                                                          log.Severity == "Warning" ? "gb-badge--pending" : "gb-badge--completed")">
+                            @log.Severity
+                        </span>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

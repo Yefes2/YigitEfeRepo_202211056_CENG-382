@@ -15,13 +15,18 @@ namespace GrubBytes.Controllers
         private readonly CartService _cartService;
         private readonly AppDbContext _db;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly LogService _logService;
+        private readonly EmailService _emailService;
+
 
         public CartController(CartService cartService, AppDbContext db,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager, LogService logService, EmailService emailService)
         {
             _cartService = cartService;
             _db = db;
             _userManager = userManager;
+            _logService = logService;
+            _emailService = emailService;
         }
 
         public IActionResult Index()
@@ -30,6 +35,55 @@ namespace GrubBytes.Controllers
             ViewBag.Total = _cartService.GetTotal();
             return View(cart);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Rate(int orderId)
+        {
+            var order = await _db.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MenuItem)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null || order.Status != "Completed")
+                return RedirectToAction("OrderHistory");
+
+            ViewBag.Order = order;
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Rate(int orderId, int menuItemScore,
+    int catererScore, string comment)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var order = await _db.Orders
+                .Include(o => o.OrderItems)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null) return NotFound();
+
+            var firstItem = await _db.MenuItems.FindAsync(order.OrderItems.First().MenuItemId);
+
+            _db.Ratings.Add(new GrubBytes.Models.Rating
+            {
+                UserId = user!.Id,
+                OrderId = orderId,
+                MenuItemId = firstItem!.Id,
+                CatererId = order.CatererId,
+                MenuItemScore = menuItemScore,
+                CatererScore = catererScore,
+                Comment = comment,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            await _db.SaveChangesAsync();
+            await _logService.LogAsync("RatingSubmitted",
+                $"User rated Order #{orderId} — Food: {menuItemScore}/5, Caterer: {catererScore}/5",
+                user.Id, orderId);
+
+            return RedirectToAction("OrderHistory");
+        }
+
 
         [HttpPost]
         public async Task<IActionResult> AddToCart(int menuItemId, int quantity = 1)
@@ -131,8 +185,28 @@ namespace GrubBytes.Controllers
             await _db.SaveChangesAsync();
             _cartService.ClearCart();
 
+            var itemNames = cart.Select(c => $"{c.Title} x{c.Quantity}").ToList();
+            try
+            {
+                await _emailService.SendOrderConfirmationAsync(
+                    user!.Email!, user.FullName, order.Id, order.TotalAmount, itemNames);
+                await _logService.LogAsync("EmailSent",
+                    $"Order confirmation email sent for Order #{order.Id}", user.Id, order.Id);
+            }
+            catch (Exception ex)
+            {
+                await _logService.LogAsync("EmailError",
+                    $"Failed to send email for Order #{order.Id}: {ex.Message}",
+                    user!.Id, order.Id, "Error");
+            }
+
+            await _logService.LogAsync("OrderCreated",
+            $"Order #{order.Id} placed for ₺{order.TotalAmount}",
+            user!.Id, order.Id);
+
             return RedirectToAction("OrderConfirmation", new { orderId = order.Id });
         }
+
 
         public async Task<IActionResult> OrderHistory()
         {
