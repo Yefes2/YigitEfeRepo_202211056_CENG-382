@@ -1,6 +1,7 @@
 ﻿using GrubBytes.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace GrubBytes.Data
 {
@@ -16,6 +17,10 @@ namespace GrubBytes.Data
         public DbSet<OrderItemCustomization> OrderItemCustomizations { get; set; }
         public DbSet<Rating> Ratings { get; set; }
         public DbSet<Log> Logs { get; set; }
+
+        public DbSet<Favorite> Favorites { get; set; }
+
+
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -105,6 +110,23 @@ namespace GrubBytes.Data
                 .WithMany(o => o.Logs)
                 .HasForeignKey(l => l.OrderId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Favorite>()
+                .HasOne(f => f.User)
+                .WithMany()
+                .HasForeignKey(f => f.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Favorite>()
+                .HasOne(f => f.MenuItem)
+                .WithMany()
+                .HasForeignKey(f => f.MenuItemId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Prevent duplicate favorites
+            builder.Entity<Favorite>()
+                .HasIndex(f => new { f.UserId, f.MenuItemId })
+                .IsUnique();
         }
     }
 }

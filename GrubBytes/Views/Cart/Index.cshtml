@@ -1,64 +1,126 @@
-﻿@model List<GrubBytes.Models.CartItem>
+﻿@model IEnumerable<GrubBytes.Models.MenuItem>
 @{
-    ViewData["Title"] = "Your Cart";
+    ViewData["Title"] = "Home";
+    var favoriteIds = ViewBag.FavoriteIds as List<int> ?? new List<int>();
 }
 
 <div class="gb-page-header">
-    <h1 class="gb-page-title">Your Cart</h1>
+    <h1 class="gb-page-title">Today's Menu</h1>
+    <p class="gb-page-sub">Fresh from your neighborhood caterers</p>
 </div>
 
 @if (!Model.Any())
 {
-    <div class="gb-card" style="text-align:center; padding:3rem;">
-        <p style="color:var(--gb-muted)">Your cart is empty.</p>
-        <a href="/" class="gb-btn gb-btn--primary" style="margin-top:1rem">Browse Menu</a>
+    <div class="gb-card" style="text-align:center; padding: 3rem;">
+        <p style="color: var(--gb-muted)">No menu items available yet. Check back soon!</p>
     </div>
 }
 else
 {
-    <div style="display:grid; grid-template-columns: 1fr 320px; gap:1.5rem; align-items:start;">
-        <div>
-            @foreach (var item in Model)
-            {
-                <div class="gb-card" style="margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center; gap:1rem;">
-                    <div>
-                        <h3 style="font-family:var(--font-display); font-size:1.2rem;">@item.Title</h3>
-                        <p style="color:var(--gb-muted); font-size:0.85rem;">₺@item.UnitPrice.ToString("0.00") each</p>
-                    </div>
-
-                    <div style="display:flex; align-items:center; gap:0.75rem;">
-                        <form asp-action="UpdateQuantity" method="post" style="display:flex; align-items:center; gap:0.5rem;">
-                            <input type="hidden" name="menuItemId" value="@item.MenuItemId" />
-                            <input type="number" name="quantity" value="@item.Quantity" min="1" max="99"
-                                   class="gb-input" style="width:70px; text-align:center;" />
-                            <button type="submit" class="gb-btn gb-btn--outline">Update</button>
-                        </form>
-
-                        <p style="font-family:var(--font-display); font-size:1.3rem; color:var(--gb-gold);">
-                            ₺@item.ItemTotal.ToString("0.00")
-                        </p>
-
-                        <form asp-action="Remove" method="post">
-                            <input type="hidden" name="menuItemId" value="@item.MenuItemId" />
-                            <button type="submit" class="gb-btn gb-btn--outline"
-                                    style="border-color:#ff4444; color:#ff6666;">
-                                Remove
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            }
+    <!-- Filter Bar -->
+    <div class="gb-filter-bar" style="align-items:center;">
+        <input type="text" id="searchInput" class="gb-input" placeholder="Search menu..."
+               style="max-width:280px;" />
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+            <span style="color:var(--gb-muted); font-size:0.85rem; white-space:nowrap;">Price:</span>
+            <input type="number" id="minPrice" class="gb-input" placeholder="Min ₺"
+                   style="width:90px;" min="0" />
+            <span style="color:var(--gb-muted);">—</span>
+            <input type="number" id="maxPrice" class="gb-input" placeholder="Max ₺"
+                   style="width:90px;" min="0" />
         </div>
-
-        <div class="gb-card" style="position:sticky; top:80px;">
-            <h3 style="font-family:var(--font-display); font-size:1.4rem; margin-bottom:1rem;">Order Summary</h3>
-            <div style="display:flex; justify-content:space-between; margin-bottom:1rem; padding-bottom:1rem; border-bottom:1px solid var(--gb-border);">
-                <span style="color:var(--gb-muted)">Total</span>
-                <span style="font-family:var(--font-display); font-size:1.5rem; color:var(--gb-orange);">
-                    ₺@ViewBag.Total.ToString("0.00")
-                </span>
-            </div>
-            <a asp-action="Checkout" class="gb-btn gb-btn--primary gb-btn--full">Proceed to Payment</a>
-        </div>
+        <span id="resultCount" style="color:var(--gb-muted); font-size:0.875rem; align-self:center;"></span>
     </div>
+
+    <div class="gb-menu-grid" id="menuGrid">
+        @foreach (var item in Model)
+        {
+            var isFav = favoriteIds.Contains(item.Id);
+            <div class="gb-card gb-menu-card"
+                 data-title="@item.Title.ToLower()"
+                 data-price="@item.Price.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)">
+                <div class="gb-menu-card__body">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <p class="gb-menu-card__caterer">
+                            <a href="/Home/CatererProfile/@item.CatererId"
+                               style="color:var(--gb-orange);">
+                                @item.Caterer?.BusinessName
+                            </a>
+                        </p>
+                        @if (User.IsInRole("User"))
+                        {
+                            <form asp-controller="Cart" asp-action="ToggleFavorite" method="post">
+                                <input type="hidden" name="menuItemId" value="@item.Id" />
+                                <button type="submit" class="gb-btn-icon" title="@(isFav ? "Remove from favorites" : "Add to favorites")">
+                                    <svg width="16" height="16" viewBox="0 0 24 24"
+                                         fill="@(isFav ? "var(--gb-orange)" : "none")"
+                                         stroke="var(--gb-orange)" stroke-width="2"
+                                         stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                                    </svg>
+                                </button>
+                            </form>
+                        }
+                    </div>
+                    <h3 class="gb-menu-card__title">@item.Title</h3>
+                    <p class="gb-menu-card__desc">@item.Description</p>
+                </div>
+                <div class="gb-menu-card__footer">
+                    <span class="gb-menu-card__price">₺@item.Price.ToString("0.00")</span>
+                    @if (User.IsInRole("User"))
+                    {
+                        <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                            <input type="hidden" name="menuItemId" value="@item.Id" />
+                            <input type="hidden" name="quantity" value="1" />
+                            <button type="submit" class="gb-btn gb-btn--primary">Add to Cart</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <div id="noResults" style="display:none; text-align:center; padding:2rem; color:var(--gb-muted);">
+        No items match your search.
+    </div>
+}
+
+@section Scripts {
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        const minPrice = document.getElementById('minPrice');
+        const maxPrice = document.getElementById('maxPrice');
+        const allCards = Array.from(document.querySelectorAll('#menuGrid .gb-menu-card'));
+        const noResults = document.getElementById('noResults');
+        const resultCount = document.getElementById('resultCount');
+
+        function applyFilters() {
+            const search = searchInput.value.toLowerCase().trim();
+            const min = parseFloat(minPrice.value) || 0;
+            const max = parseFloat(maxPrice.value) || Infinity;
+
+            let visible = 0;
+            allCards.forEach(card => {
+                const titleMatch = card.dataset.title.includes(search);
+                const price = parseFloat(card.dataset.price);
+                const priceMatch = price >= min && price <= max;
+
+                if (titleMatch && priceMatch) {
+                    card.style.display = '';
+                    visible++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            noResults.style.display = visible === 0 ? 'block' : 'none';
+            resultCount.textContent = `${visible} item${visible !== 1 ? 's' : ''}`;
+        }
+
+        searchInput.addEventListener('input', applyFilters);
+        minPrice.addEventListener('input', applyFilters);
+        maxPrice.addEventListener('input', applyFilters);
+
+        applyFilters();
+    </script>
 }

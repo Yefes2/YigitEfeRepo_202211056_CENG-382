@@ -17,16 +17,20 @@ namespace GrubBytes.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly LogService _logService;
         private readonly EmailService _emailService;
+        private readonly PdfService _pdfService;
+        
 
 
         public CartController(CartService cartService, AppDbContext db,
-            UserManager<ApplicationUser> userManager, LogService logService, EmailService emailService)
+            UserManager<ApplicationUser> userManager, LogService logService, EmailService emailService,
+            PdfService pdfService)
         {
             _cartService = cartService;
             _db = db;
             _userManager = userManager;
             _logService = logService;
             _emailService = emailService;
+            _pdfService = pdfService;
         }
 
         public IActionResult Index()
@@ -229,6 +233,90 @@ namespace GrubBytes.Controllers
                 .FirstOrDefaultAsync(o => o.Id == orderId);
 
             return View(order);
+        }
+
+
+        public async Task<IActionResult> DownloadReceipt(int orderId)
+        {
+            var order = await _db.Orders
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MenuItem)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null) return NotFound();
+
+            var pdf = _pdfService.GenerateReceipt(order);
+            return File(pdf, "application/pdf", $"GrubBytes_Receipt_Order{orderId}.pdf");
+        }
+
+        public async Task<IActionResult> DownloadAgreement(int orderId)
+        {
+            var order = await _db.Orders
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MenuItem)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null) return NotFound();
+
+            var pdf = _pdfService.GenerateAgreement(order);
+            return File(pdf, "application/pdf", $"GrubBytes_Agreement_Order{orderId}.pdf");
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> Reorder(int orderId)
+        {
+            var order = await _db.Orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MenuItem)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null) return NotFound();
+
+            _cartService.ClearCart();
+
+            foreach (var item in order.OrderItems)
+            {
+                if (item.MenuItem?.IsAvailable == true)
+                {
+                    _cartService.AddItem(new CartItem
+                    {
+                        MenuItemId = item.MenuItemId,
+                        Title = item.MenuItem.Title,
+                        UnitPrice = item.MenuItem.Price,
+                        Quantity = item.Quantity
+                    });
+                }
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ToggleFavorite(int menuItemId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var existing = await _db.Favorites
+                .FirstOrDefaultAsync(f => f.UserId == user!.Id && f.MenuItemId == menuItemId);
+
+            if (existing != null)
+            {
+                _db.Favorites.Remove(existing);
+            }
+            else
+            {
+                _db.Favorites.Add(new Favorite
+                {
+                    UserId = user!.Id,
+                    MenuItemId = menuItemId,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+
+            await _db.SaveChangesAsync();
+            return RedirectToAction("Index", "Home");
         }
     }
 }

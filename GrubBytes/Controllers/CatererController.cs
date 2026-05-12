@@ -20,7 +20,60 @@ namespace GrubBytes.Controllers
             _userManager = userManager;
         }
 
-        public IActionResult Dashboard() => View();
+        public async Task<IActionResult> Dashboard()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var profile = await _db.CatererProfiles
+                .Include(c => c.MenuItems)
+                .Include(c => c.Orders)
+                    .ThenInclude(o => o.OrderItems)
+                .FirstOrDefaultAsync(c => c.UserId == user!.Id);
+
+            if (profile == null) return View();
+
+            var orders = profile.Orders.ToList();
+            var menuItems = profile.MenuItems.ToList();
+
+            var ratings = await _db.Ratings
+                .Where(r => r.CatererId == profile.Id)
+                .ToListAsync();
+
+            // Revenue per day for last 7 days
+            var last7 = Enumerable.Range(0, 7)
+                .Select(i => DateTime.UtcNow.Date.AddDays(-i))
+                .Reverse()
+                .ToList();
+
+            var revenueByDay = last7.Select(day => new
+            {
+                Label = day.ToString("dd MMM"),
+                Revenue = orders
+                    .Where(o => o.CreatedAt.Date == day)
+                    .Sum(o => o.TotalAmount)
+            }).ToList();
+
+            // Orders per menu item
+            var itemOrderCounts = menuItems.Select(m => new
+            {
+                Title = m.Title,
+                Count = orders
+                    .SelectMany(o => o.OrderItems)
+                    .Count(oi => oi.MenuItemId == m.Id)
+            }).OrderByDescending(x => x.Count).ToList();
+
+            ViewBag.MenuItemCount = menuItems.Count;
+            ViewBag.TotalOrders = orders.Count;
+            ViewBag.TotalRevenue = orders.Sum(o => o.TotalAmount);
+            ViewBag.AvgRating = ratings.Any()
+                ? ratings.Average(r => r.CatererScore).ToString("0.0")
+                : "—";
+            ViewBag.RevenueDays = revenueByDay.Select(x => x.Label).ToList();
+            ViewBag.RevenueValues = revenueByDay.Select(x => x.Revenue).ToList();
+            ViewBag.ItemLabels = itemOrderCounts.Select(x => x.Title).ToList();
+            ViewBag.ItemCounts = itemOrderCounts.Select(x => x.Count).ToList();
+
+            return View();
+        }
 
         public async Task<IActionResult> Menu()
         {
@@ -67,6 +120,24 @@ namespace GrubBytes.Controllers
 
             _db.MenuItems.Add(item);
             await _db.SaveChangesAsync();
+            return RedirectToAction("Menu");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ToggleAvailability(int menuItemId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var profile = await _db.CatererProfiles
+                .FirstOrDefaultAsync(c => c.UserId == user!.Id);
+
+            var item = await _db.MenuItems
+                .FirstOrDefaultAsync(m => m.Id == menuItemId && m.CatererId == profile!.Id);
+
+            if (item == null) return NotFound();
+
+            item.IsAvailable = !item.IsAvailable;
+            await _db.SaveChangesAsync();
+
             return RedirectToAction("Menu");
         }
     }

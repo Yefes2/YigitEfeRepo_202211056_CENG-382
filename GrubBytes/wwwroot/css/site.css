@@ -205,9 +205,11 @@ a {
     }
 
 .gb-sidebar__icon {
-    font-size: 6px;
+    width: 14px;
+    height: 14px;
     color: var(--gb-orange);
     opacity: 0.7;
+    flex-shrink: 0;
 }
 
 /* ── MAIN CONTENT ── */
@@ -469,4 +471,228 @@ a {
     font-family: var(--font-display);
     font-size: 1.4rem;
     color: var(--gb-gold);
+}
+
+/* Filter bar */
+.gb-filter-bar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+}
+
+/* Pagination */
+.gb-pagination {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.gb-pagination__btn {
+    min-width: 2.25rem;
+    padding: 0.4rem 0.75rem;
+}
+
+.gb-pagination__btn--active {
+    background: var(--gb-orange) !important;
+    color: #fff !important;
+    border-color: var(--gb-orange) !important;
+}
+
+/* Password strength */
+.gb-strength-bar-wrap {
+    height: 4px;
+    background: var(--gb-border);
+    border-radius: 2px;
+    margin-top: 0.5rem;
+    overflow: hidden;
+}
+
+.gb-strength-bar {
+    height: 100%;
+    width: 0%;
+    border-radius: 2px;
+    transition: width 0.3s ease, background 0.3s ease;
+}
+
+.gb-strength-label {
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+/* ── SIDEBAR ACTIVE LINK ── */
+.gb-sidebar__link--active {
+    color: var(--gb-text);
+    background: var(--gb-dark3);
+    border-left-color: var(--gb-orange);
+}
+
+/* ── BACK TO TOP ── */
+.gb-back-to-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    background: var(--gb-orange);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.2s ease;
+    z-index: 200;
+}
+
+.gb-back-to-top--visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.gb-back-to-top:hover {
+    transform: translateY(-3px);
+}
+
+/* ── TOAST ── */
+.gb-toast-container {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    z-index: 300;
+    pointer-events: none;
+}
+
+.gb-toast {
+    background: var(--gb-dark2);
+    border: 1px solid var(--gb-border);
+    border-radius: 8px;
+    padding: 0.65rem 1.1rem;
+    font-size: 0.875rem;
+    color: var(--gb-text);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    border-left: 3px solid var(--gb-orange);
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events: all;
+    min-width: 220px;
+    max-width: 360px;
+    box-shadow: 0 4px 16px #0006;
+}
+
+.gb-toast--visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.gb-toast--success {
+    border-left-color: var(--gb-green);
+}
+
+.gb-toast--error {
+    border-left-color: #e74c3c;
+}
+
+.gb-toast--warning {
+    border-left-color: var(--gb-gold);
+}
+
+/* ── LOADING SPINNER ── */
+.gb-spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    vertical-align: middle;
+    margin-left: 0.4rem;
+}
+
+    .gb-spinner circle {
+        stroke: currentColor;
+        stroke-dasharray: 50;
+        stroke-dashoffset: 50;
+        animation: gb-spin-dash 1s ease-in-out infinite;
+        transform-origin: center;
+    }
+
+@keyframes gb-spin-dash {
+    0% {
+        stroke-dashoffset: 50;
+    }
+
+    50% {
+        stroke-dashoffset: 10;
+    }
+
+    100% {
+        stroke-dashoffset: 50;
+    }
+}
+
+.gb-btn--loading {
+    opacity: 0.75;
+    pointer-events: none;
+}
+
+/* Favorite / icon button */
+.gb-btn-icon {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s ease;
+}
+
+    .gb-btn-icon:hover {
+        transform: scale(1.2);
+    }
+
+/* ── LIGHT MODE ── */
+body.gb-light {
+    --gb-dark: #F5F0E8;
+    --gb-dark2: #EDE8DF;
+    --gb-dark3: #E4DDD2;
+    --gb-border: #D4CEC6;
+    --gb-text: #1A1A1A;
+    --gb-muted: #6B6660;
+}
+
+    body.gb-light .gb-navbar {
+        background: #EDE8DF;
+        border-bottom-color: #D4CEC6;
+    }
+
+    body.gb-light .gb-sidebar {
+        background: #EDE8DF;
+        border-right-color: #D4CEC6;
+    }
+
+    body.gb-light .gb-footer {
+        background: #EDE8DF;
+        border-top-color: #D4CEC6;
+    }
+
+    body.gb-light .gb-back-to-top {
+        box-shadow: 0 2px 8px #0002;
+    }
+
+.gb-theme-toggle {
+    padding: 0.4rem 0.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

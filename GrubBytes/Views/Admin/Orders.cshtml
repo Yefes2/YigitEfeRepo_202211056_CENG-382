@@ -1,0 +1,160 @@
+﻿@model List<GrubBytes.Models.Order>
+@{
+    ViewData["Title"] = "Order Management";
+}
+
+<div class="gb-page-header">
+    <h1 class="gb-page-title">Order Management</h1>
+</div>
+
+<div class="gb-filter-bar">
+    <input type="text" id="searchInput" class="gb-input" placeholder="Search by order # or user..." />
+    <select id="statusFilter" class="gb-input">
+        <option value="">All Statuses</option>
+        <option value="Pending">Pending</option>
+        <option value="Completed">Completed</option>
+    </select>
+    <span id="resultCount" style="color:var(--gb-muted); font-size:0.875rem; align-self:center;"></span>
+</div>
+
+<table class="gb-table" id="ordersTable">
+    <thead>
+        <tr>
+            <th>Order #</th>
+            <th>User</th>
+            <th>Caterer</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="ordersBody">
+        @foreach (var order in Model)
+        {
+            <tr data-search="@((order.Id.ToString() + " " + order.User?.Email).ToLower())"
+                data-status="@order.Status">
+                <td style="font-family:var(--font-display);">#@order.Id</td>
+                <td style="font-size:0.85rem;">@order.User?.Email</td>
+                <td style="font-size:0.85rem;">@order.Caterer?.BusinessName</td>
+                <td style="font-size:0.85rem; color:var(--gb-muted);">
+                    @order.OrderItems.Count item(s)
+                </td>
+                <td style="color:var(--gb-gold); font-family:var(--font-display);">
+                    ₺@order.TotalAmount.ToString("0.00")
+                </td>
+                <td style="font-size:0.82rem; color:var(--gb-muted); white-space:nowrap;">
+                    @order.CreatedAt.ToString("dd MMM yyyy, HH:mm")
+                </td>
+                <td>
+                    <span class="gb-badge @(order.Status == "Completed" ? "gb-badge--completed" : "gb-badge--pending")">
+                        @order.Status
+                    </span>
+                </td>
+                <td>
+                    <form asp-action="UpdateOrderStatus" method="post" style="display:flex; gap:0.4rem;">
+                        <input type="hidden" name="orderId" value="@order.Id" />
+                        <select name="status" class="gb-input" style="font-size:0.78rem; padding:0.3rem 0.5rem; width:auto;">
+                            <option value="Pending" selected="@(order.Status == "Pending" ? "selected" : null)">Pending</option>
+                            <option value="Completed" selected="@(order.Status == "Completed" ? "selected" : null)">Completed</option>
+                        </select>
+                        <button type="submit" class="gb-btn gb-btn--primary"
+                                style="font-size:0.78rem; padding:0.3rem 0.75rem;">
+                            Save
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div id="noResults" style="display:none; text-align:center; padding:2rem; color:var(--gb-muted);">
+    No orders match your search.
+</div>
+
+<div class="gb-pagination" id="pagination"></div>
+
+@section Scripts {
+<script>
+    const ROWS_PER_PAGE = 15;
+    let currentPage = 1;
+    let filteredRows = [];
+
+    const searchInput  = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const allRows      = Array.from(document.querySelectorAll('#ordersBody tr'));
+    const noResults    = document.getElementById('noResults');
+    const resultCount  = document.getElementById('resultCount');
+    const pagination   = document.getElementById('pagination');
+
+    function applyFilters() {
+        const search = searchInput.value.toLowerCase().trim();
+        const status = statusFilter.value;
+
+        filteredRows = allRows.filter(row => {
+            const searchMatch = row.dataset.search.includes(search);
+            const statusMatch = !status || row.dataset.status === status;
+            return searchMatch && statusMatch;
+        });
+
+        currentPage = 1;
+        render();
+    }
+
+    function render() {
+        allRows.forEach(r => r.style.display = 'none');
+
+        if (filteredRows.length === 0) {
+            noResults.style.display = 'block';
+            pagination.innerHTML = '';
+            resultCount.textContent = '0 orders';
+            return;
+        }
+
+        noResults.style.display = 'none';
+
+        const totalPages = Math.ceil(filteredRows.length / ROWS_PER_PAGE);
+        const start = (currentPage - 1) * ROWS_PER_PAGE;
+        const end   = start + ROWS_PER_PAGE;
+
+        filteredRows.slice(start, end).forEach(r => r.style.display = '');
+        resultCount.textContent = `${filteredRows.length} order${filteredRows.length !== 1 ? 's' : ''}`;
+
+        renderPagination(totalPages);
+    }
+
+    function renderPagination(totalPages) {
+        pagination.innerHTML = '';
+        if (totalPages <= 1) return;
+
+        const prev = document.createElement('button');
+        prev.textContent = '←';
+        prev.className = 'gb-btn gb-btn--ghost gb-pagination__btn';
+        prev.disabled = currentPage === 1;
+        prev.onclick = () => { currentPage--; render(); };
+        pagination.appendChild(prev);
+
+        for (let i = 1; i <= totalPages; i++) {
+            const btn = document.createElement('button');
+            btn.textContent = i;
+            btn.className = 'gb-btn gb-btn--ghost gb-pagination__btn' + (i === currentPage ? ' gb-pagination__btn--active' : '');
+            btn.onclick = () => { currentPage = i; render(); };
+            pagination.appendChild(btn);
+        }
+
+        const next = document.createElement('button');
+        next.textContent = '→';
+        next.className = 'gb-btn gb-btn--ghost gb-pagination__btn';
+        next.disabled = currentPage === totalPages;
+        next.onclick = () => { currentPage++; render(); };
+        pagination.appendChild(next);
+    }
+
+    searchInput.addEventListener('input', applyFilters);
+    statusFilter.addEventListener('change', applyFilters);
+
+    applyFilters();
+</script>
+}

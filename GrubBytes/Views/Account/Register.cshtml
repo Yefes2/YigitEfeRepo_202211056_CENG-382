@@ -25,16 +25,20 @@
 
             <div class="gb-form-group">
                 <label asp-for="Password">Password</label>
-                <input asp-for="Password" type="password" class="gb-input" placeholder="••••••" />
+                <input asp-for="Password" type="password" id="passwordInput" class="gb-input" placeholder="••••••" />
+                <div class="gb-strength-bar-wrap">
+                    <div class="gb-strength-bar" id="strengthBar"></div>
+                </div>
+                <span class="gb-strength-label" id="strengthLabel"></span>
                 <span asp-validation-for="Password" class="gb-field-error"></span>
             </div>
-
             <div class="gb-form-group">
                 <label asp-for="ConfirmPassword">Confirm Password</label>
                 <input asp-for="ConfirmPassword" type="password" class="gb-input" placeholder="••••••" />
                 <span asp-validation-for="ConfirmPassword" class="gb-field-error"></span>
             </div>
 
+            <div class="g-recaptcha" data-sitekey="@ViewData["ReCaptchaSiteKey"]" style="margin-bottom:1rem;"></div>
             <button type="submit" class="gb-btn gb-btn--primary gb-btn--full">Create Account</button>
         </form>
 
@@ -43,3 +47,15 @@
         </p>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/password-strength.js"></script>
+    <script>
+        initPasswordStrength('passwordInput', 'strengthBar', 'strengthLabel');
+    </script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script src="~/js/password-strength.js"></script>
+    <script>
+        initPasswordStrength('passwordInput', 'strengthBar', 'strengthLabel');
+    </script>
+}

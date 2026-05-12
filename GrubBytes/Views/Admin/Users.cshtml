@@ -1,0 +1,167 @@
+﻿@model List<GrubBytes.Models.ApplicationUser>
+@{
+    ViewData["Title"] = "User Management";
+    var userRoles = ViewBag.UserRoles as Dictionary<string, IList<string>> ?? new();
+}
+
+<div class="gb-page-header">
+    <h1 class="gb-page-title">User Management</h1>
+</div>
+
+<div class="gb-filter-bar">
+    <input type="text" id="searchInput" class="gb-input" placeholder="Search by email or name..." />
+    <select id="roleFilter" class="gb-input">
+        <option value="">All Roles</option>
+        <option value="Admin">Admin</option>
+        <option value="Caterer">Caterer</option>
+        <option value="User">User</option>
+    </select>
+    <select id="statusFilter" class="gb-input">
+        <option value="">All Statuses</option>
+        <option value="Active">Active</option>
+        <option value="Locked">Locked</option>
+    </select>
+    <span id="resultCount" style="color:var(--gb-muted); font-size:0.875rem; align-self:center;"></span>
+</div>
+
+<table class="gb-table" id="usersTable">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Joined</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody id="usersBody">
+        @foreach (var user in Model)
+        {
+            var roles = userRoles.ContainsKey(user.Id) ? userRoles[user.Id] : new List<string>();
+            var role = roles.FirstOrDefault() ?? "—";
+            var isLocked = user.LockoutEnd.HasValue && user.LockoutEnd > DateTimeOffset.UtcNow;
+            var status = isLocked ? "Locked" : "Active";
+            <tr data-search="@((user.FullName + " " + user.Email).ToLower())"
+                data-role="@role"
+                data-status="@status">
+                <td>@user.FullName</td>
+                <td style="font-size:0.85rem; color:var(--gb-muted);">@user.Email</td>
+                <td>
+                    <span class="gb-badge gb-badge--pending">@role</span>
+                </td>
+                <td style="font-size:0.82rem; color:var(--gb-muted);">
+                    @user.CreatedAt.ToString("dd MMM yyyy")
+                </td>
+                <td>
+                    <span class="gb-badge @(isLocked ? "gb-badge--cancelled" : "gb-badge--completed")">
+                        @status
+                    </span>
+                </td>
+                <td>
+                    <form asp-action="ToggleUserActive" method="post" style="display:inline;">
+                        <input type="hidden" name="userId" value="@user.Id" />
+                        <button type="submit"
+                                class="gb-btn @(isLocked ? "gb-btn--primary" : "gb-btn--outline")"
+                                style="font-size:0.78rem; padding:0.3rem 0.75rem;">
+                            @(isLocked ? "Unlock" : "Lock")
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div id="noResults" style="display:none; text-align:center; padding:2rem; color:var(--gb-muted);">
+    No users match your search.
+</div>
+
+<div class="gb-pagination" id="pagination"></div>
+
+@section Scripts {
+    <script>
+        const ROWS_PER_PAGE = 10;
+        let currentPage = 1;
+        let filteredRows = [];
+
+        const searchInput = document.getElementById('searchInput');
+        const roleFilter = document.getElementById('roleFilter');
+        const statusFilter = document.getElementById('statusFilter');
+        const allRows = Array.from(document.querySelectorAll('#usersBody tr'));
+        const noResults = document.getElementById('noResults');
+        const resultCount = document.getElementById('resultCount');
+        const pagination = document.getElementById('pagination');
+
+        function applyFilters() {
+            const search = searchInput.value.toLowerCase().trim();
+            const role = roleFilter.value;
+            const status = statusFilter.value;
+
+            filteredRows = allRows.filter(row => {
+                const searchMatch = row.dataset.search.includes(search);
+                const roleMatch = !role || row.dataset.role === role;
+                const statusMatch = !status || row.dataset.status === status;
+                return searchMatch && roleMatch && statusMatch;
+            });
+
+            currentPage = 1;
+            render();
+        }
+
+        function render() {
+            allRows.forEach(r => r.style.display = 'none');
+
+            if (filteredRows.length === 0) {
+                noResults.style.display = 'block';
+                pagination.innerHTML = '';
+                resultCount.textContent = '0 users';
+                return;
+            }
+
+            noResults.style.display = 'none';
+
+            const totalPages = Math.ceil(filteredRows.length / ROWS_PER_PAGE);
+            const start = (currentPage - 1) * ROWS_PER_PAGE;
+            const end = start + ROWS_PER_PAGE;
+
+            filteredRows.slice(start, end).forEach(r => r.style.display = '');
+            resultCount.textContent = `${filteredRows.length} user${filteredRows.length !== 1 ? 's' : ''}`;
+
+            renderPagination(totalPages);
+        }
+
+        function renderPagination(totalPages) {
+            pagination.innerHTML = '';
+            if (totalPages <= 1) return;
+
+            const prev = document.createElement('button');
+            prev.textContent = '←';
+            prev.className = 'gb-btn gb-btn--ghost gb-pagination__btn';
+            prev.disabled = currentPage === 1;
+            prev.onclick = () => { currentPage--; render(); };
+            pagination.appendChild(prev);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                btn.className = 'gb-btn gb-btn--ghost gb-pagination__btn' + (i === currentPage ? ' gb-pagination__btn--active' : '');
+                btn.onclick = () => { currentPage = i; render(); };
+                pagination.appendChild(btn);
+            }
+
+            const next = document.createElement('button');
+            next.textContent = '→';
+            next.className = 'gb-btn gb-btn--ghost gb-pagination__btn';
+            next.disabled = currentPage === totalPages;
+            next.onclick = () => { currentPage++; render(); };
+            pagination.appendChild(next);
+        }
+
+        searchInput.addEventListener('input', applyFilters);
+        roleFilter.addEventListener('change', applyFilters);
+        statusFilter.addEventListener('change', applyFilters);
+
+        applyFilters();
+    </script>
+}

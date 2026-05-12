@@ -19,19 +19,31 @@
 }
 else
 {
-    <table class="gb-table">
+    <div class="gb-filter-bar">
+        <input type="text" id="searchInput" class="gb-input" placeholder="Search by name..." />
+        <select id="statusFilter" class="gb-input">
+            <option value="">All Statuses</option>
+            <option value="Available">Available</option>
+            <option value="Unavailable">Unavailable</option>
+        </select>
+        <span id="resultCount" style="color: var(--gb-muted); font-size: 0.875rem; align-self: center;"></span>
+    </div>
+
+    <table class="gb-table" id="menuTable">
         <thead>
             <tr>
                 <th>Name</th>
                 <th>Description</th>
                 <th>Price</th>
                 <th>Status</th>
+                <th>Action</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="menuBody">
             @foreach (var item in Model)
             {
-                <tr>
+                <tr data-name="@item.Title.ToLower()"
+                    data-status="@(item.IsAvailable ? "Available" : "Unavailable")">
                     <td>@item.Title</td>
                     <td>@item.Description</td>
                     <td>₺@item.Price.ToString("0.00")</td>
@@ -40,8 +52,107 @@ else
                             @(item.IsAvailable ? "Available" : "Unavailable")
                         </span>
                     </td>
+                    <td>
+                        <form asp-action="ToggleAvailability" method="post" style="display:inline;">
+                            <input type="hidden" name="menuItemId" value="@item.Id" />
+                            <button type="submit"
+                                    class="gb-btn @(item.IsAvailable ? "gb-btn--outline" : "gb-btn--primary")"
+                                    style="font-size:0.78rem; padding:0.3rem 0.75rem;">
+                                @(item.IsAvailable ? "Mark Unavailable" : "Mark Available")
+                            </button>
+                        </form>
+                    </td>
                 </tr>
             }
         </tbody>
     </table>
+
+    <div id="noResults" style="display:none; text-align:center; padding: 2rem; color: var(--gb-muted);">
+        No items match your search.
+    </div>
+
+    <div class="gb-pagination" id="pagination"></div>
+}
+
+@section Scripts {
+    <script>
+        const ROWS_PER_PAGE = 8;
+        let currentPage = 1;
+        let filteredRows = [];
+
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const allRows = Array.from(document.querySelectorAll('#menuBody tr'));
+        const noResults = document.getElementById('noResults');
+        const resultCount = document.getElementById('resultCount');
+        const pagination = document.getElementById('pagination');
+
+        function applyFilters() {
+            const search = searchInput.value.toLowerCase().trim();
+            const status = statusFilter.value;
+
+            filteredRows = allRows.filter(row => {
+                const nameMatch = row.dataset.name.includes(search);
+                const statusMatch = !status || row.dataset.status === status;
+                return nameMatch && statusMatch;
+            });
+
+            currentPage = 1;
+            render();
+        }
+
+        function render() {
+            allRows.forEach(r => r.style.display = 'none');
+
+            if (filteredRows.length === 0) {
+                noResults.style.display = 'block';
+                pagination.innerHTML = '';
+                resultCount.textContent = '0 items';
+                return;
+            }
+
+            noResults.style.display = 'none';
+
+            const totalPages = Math.ceil(filteredRows.length / ROWS_PER_PAGE);
+            const start = (currentPage - 1) * ROWS_PER_PAGE;
+            const end = start + ROWS_PER_PAGE;
+
+            filteredRows.slice(start, end).forEach(r => r.style.display = '');
+            resultCount.textContent = `${filteredRows.length} item${filteredRows.length !== 1 ? 's' : ''}`;
+
+            renderPagination(totalPages);
+        }
+
+        function renderPagination(totalPages) {
+            pagination.innerHTML = '';
+            if (totalPages <= 1) return;
+
+            const prev = document.createElement('button');
+            prev.textContent = '←';
+            prev.className = 'gb-btn gb-btn--ghost gb-pagination__btn';
+            prev.disabled = currentPage === 1;
+            prev.onclick = () => { currentPage--; render(); };
+            pagination.appendChild(prev);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                btn.className = 'gb-btn gb-btn--ghost gb-pagination__btn' + (i === currentPage ? ' gb-pagination__btn--active' : '');
+                btn.onclick = () => { currentPage = i; render(); };
+                pagination.appendChild(btn);
+            }
+
+            const next = document.createElement('button');
+            next.textContent = '→';
+            next.className = 'gb-btn gb-btn--ghost gb-pagination__btn';
+            next.disabled = currentPage === totalPages;
+            next.onclick = () => { currentPage++; render(); };
+            pagination.appendChild(next);
+        }
+
+        searchInput.addEventListener('input', applyFilters);
+        statusFilter.addEventListener('change', applyFilters);
+
+        applyFilters();
+    </script>
 }

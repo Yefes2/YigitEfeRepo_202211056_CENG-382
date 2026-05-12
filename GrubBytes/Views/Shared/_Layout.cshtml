@@ -26,6 +26,20 @@
             {
                 <a href="/Cart" class="gb-btn gb-btn--outline">Cart</a>
             }
+            <button id="themeToggle" class="gb-btn gb-btn--outline gb-theme-toggle" aria-label="Toggle theme">
+                <svg id="themeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="5" />
+                    <line x1="12" y1="1" x2="12" y2="3" />
+                    <line x1="12" y1="21" x2="12" y2="23" />
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                    <line x1="1" y1="12" x2="3" y2="12" />
+                    <line x1="21" y1="12" x2="23" y2="12" />
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                </svg>
+            </button>
             @if (User.Identity != null && User.Identity.IsAuthenticated)
             {
                 <span class="gb-navbar__user">@User.Identity.Name</span>
@@ -49,10 +63,12 @@
             <div class="gb-sidebar__section">
                 <p class="gb-sidebar__label">General</p>
                 <a href="/" class="gb-sidebar__link">
-                    <span class="gb-sidebar__icon">&#9632;</span> Home
+                    <svg class="gb-sidebar__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
+                    Home
                 </a>
                 <a href="/Menu" class="gb-sidebar__link">
-                    <span class="gb-sidebar__icon">&#9632;</span> Menu
+                    <svg class="gb-sidebar__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z" /><path d="M12 8v4l3 3" /></svg>
+                    Menu
                 </a>
             </div>
 
@@ -61,16 +77,20 @@
                 <div class="gb-sidebar__section">
                     <p class="gb-sidebar__label">Admin</p>
                     <a href="/Admin/Dashboard" class="gb-sidebar__link">
-                        <span class="gb-sidebar__icon">&#9632;</span> Dashboard
+                        <svg class="gb-sidebar__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></svg>
+                        Dashboard
                     </a>
                     <a href="/Admin/Users" class="gb-sidebar__link">
-                        <span class="gb-sidebar__icon">&#9632;</span> Users
+                        <svg class="gb-sidebar__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+                        Users
                     </a>
                     <a href="/Admin/Logs" class="gb-sidebar__link">
-                        <span class="gb-sidebar__icon">&#9632;</span> Logs
+                        <svg class="gb-sidebar__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>
+                        Logs
                     </a>
                     <a href="/Admin/Orders" class="gb-sidebar__link">
-                        <span class="gb-sidebar__icon">&#9632;</span> Orders
+                        <svg class="gb-sidebar__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
+                        Orders
                     </a>
                 </div>
             }
@@ -80,13 +100,16 @@
                 <div class="gb-sidebar__section">
                     <p class="gb-sidebar__label">Caterer</p>
                     <a href="/Caterer/Dashboard" class="gb-sidebar__link">
-                        <span class="gb-sidebar__icon">&#9632;</span> Dashboard
+                        <svg class="gb-sidebar__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /></svg>
+                        Dashboard
                     </a>
                     <a href="/Caterer/Menu" class="gb-sidebar__link">
-                        <span class="gb-sidebar__icon">&#9632;</span> My Menu
+                        <svg class="gb-sidebar__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></svg>
+                        My Menu
                     </a>
                     <a href="/Caterer/Orders" class="gb-sidebar__link">
-                        <span class="gb-sidebar__icon">&#9632;</span> Orders
+                        <svg class="gb-sidebar__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
+                        Orders
                     </a>
                 </div>
             }
@@ -96,13 +119,16 @@
                 <div class="gb-sidebar__section">
                     <p class="gb-sidebar__label">My Account</p>
                     <a href="/User/Dashboard" class="gb-sidebar__link">
-                        <span class="gb-sidebar__icon">&#9632;</span> Dashboard
+                        <svg class="gb-sidebar__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                        Dashboard
                     </a>
                     <a href="/Cart/OrderHistory" class="gb-sidebar__link">
-                        <span class="gb-sidebar__icon">&#9632;</span> My Orders
+                        <svg class="gb-sidebar__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" /><line x1="3" y1="6" x2="21" y2="6" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
+                        My Orders
                     </a>
                     <a href="/Cart" class="gb-sidebar__link">
-                        <span class="gb-sidebar__icon">&#9632;</span> Cart
+                        <svg class="gb-sidebar__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1" /><circle cx="20" cy="21" r="1" /><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" /></svg>
+                        Cart
                     </a>
                 </div>
             }
@@ -130,9 +156,107 @@
         </div>
     </footer>
 
+    <!-- BACK TO TOP -->
+    <button class="gb-back-to-top" id="backToTop" aria-label="Back to top">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15" />
+        </svg>
+    </button>
+
+    <!-- TOAST CONTAINER -->
+    <div class="gb-toast-container" id="toastContainer"></div>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        // ── SIDEBAR ACTIVE LINK ──
+        const currentPath = window.location.pathname.toLowerCase();
+        document.querySelectorAll('.gb-sidebar__link').forEach(link => {
+        const href = link.getAttribute('href')?.toLowerCase();
+        if (href && (currentPath === href || (href !== '/' && currentPath.startsWith(href)))) {
+        link.classList.add('gb-sidebar__link--active');
+        }
+        });
+
+        // ── BACK TO TOP ──
+        const backToTop = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+        backToTop.classList.toggle('gb-back-to-top--visible', window.scrollY > 300);
+        });
+        backToTop.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // ── TOAST SYSTEM ──
+        window.showToast = function (message, type = 'info') {
+        const icons = {
+        success: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gb-green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+        error: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+        warning: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gb-gold)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+        info: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gb-orange)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`
+        };
+
+        const toast = document.createElement('div');
+        toast.className = `gb-toast gb-toast--${type}`;
+        toast.innerHTML = `${icons[type] || icons.info} <span>${message}</span>`;
+        document.getElementById('toastContainer').appendChild(toast);
+
+        requestAnimationFrame(() => {
+        requestAnimationFrame(() => toast.classList.add('gb-toast--visible'));
+        });
+
+        setTimeout(() => {
+        toast.classList.remove('gb-toast--visible');
+        setTimeout(() => toast.remove(), 300);
+        }, 3500);
+        };
+
+        // ── LOADING SPINNERS ──
+        const spinnerSVG = `<svg class="gb-spinner" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="9" stroke-width="2.5"/>
+        </svg>`;
+
+        document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', () => {
+        const btn = form.querySelector('button[type="submit"]');
+        if (btn && !btn.classList.contains('gb-btn--loading')) {
+        btn.classList.add('gb-btn--loading');
+        btn.innerHTML += spinnerSVG;
+        }
+        });
+        });
+
+        // ── DARK / LIGHT MODE ──
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+
+        const moonPath = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+        const sunPaths = themeIcon ? themeIcon.innerHTML : '';
+
+        function applyTheme(theme) {
+        if (theme === 'light') {
+        document.body.classList.add('gb-light');
+        if (themeIcon) themeIcon.innerHTML = moonPath;
+        } else {
+        document.body.classList.remove('gb-light');
+        if (themeIcon) themeIcon.innerHTML = sunPaths;
+        }
+        }
+
+        // Load saved preference
+        const savedTheme = localStorage.getItem('gb-theme') || 'dark';
+        applyTheme(savedTheme);
+
+        themeToggle?.addEventListener('click', () => {
+        const isLight = document.body.classList.contains('gb-light');
+        const next = isLight ? 'dark' : 'light';
+        localStorage.setItem('gb-theme', next);
+        applyTheme(next);
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

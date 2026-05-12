@@ -1,0 +1,84 @@
+﻿@model GrubBytes.Models.CatererProfile
+@{
+    ViewData["Title"] = Model.BusinessName;
+    var ratings = ViewBag.Ratings as List<GrubBytes.Models.Rating> ?? new();
+}
+
+<div class="gb-page-header">
+    <div>
+        <h1 class="gb-page-title">@Model.BusinessName</h1>
+        <p class="gb-page-sub">@Model.Description</p>
+    </div>
+    @if (Model.AverageRating > 0)
+    {
+        <div style="font-family:var(--font-display); font-size:2rem; color:var(--gb-gold);">
+            ★ @Model.AverageRating.ToString("0.0")
+        </div>
+    }
+</div>
+
+<!-- Menu Items -->
+<h2 style="font-family:var(--font-display); font-size:1.4rem; margin-bottom:1rem;">Menu</h2>
+@if (!Model.MenuItems.Any())
+{
+    <div class="gb-card" style="text-align:center; padding:2rem;">
+        <p style="color:var(--gb-muted)">No items available right now.</p>
+    </div>
+}
+else
+{
+    <div class="gb-menu-grid" style="margin-bottom:2rem;">
+        @foreach (var item in Model.MenuItems)
+        {
+            <div class="gb-card gb-menu-card">
+                <div class="gb-menu-card__body">
+                    <h3 class="gb-menu-card__title">@item.Title</h3>
+                    <p class="gb-menu-card__desc">@item.Description</p>
+                </div>
+                <div class="gb-menu-card__footer">
+                    <span class="gb-menu-card__price">₺@item.Price.ToString("0.00")</span>
+                    @if (User.IsInRole("User"))
+                    {
+                        <form asp-controller="Cart" asp-action="AddToCart" method="post">
+                            <input type="hidden" name="menuItemId" value="@item.Id" />
+                            <input type="hidden" name="quantity" value="1" />
+                            <button type="submit" class="gb-btn gb-btn--primary">Add to Cart</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<!-- Ratings -->
+<h2 style="font-family:var(--font-display); font-size:1.4rem; margin-bottom:1rem;">Reviews</h2>
+@if (!ratings.Any())
+{
+    <div class="gb-card" style="text-align:center; padding:2rem;">
+        <p style="color:var(--gb-muted)">No reviews yet.</p>
+    </div>
+}
+else
+{
+    @foreach (var rating in ratings)
+    {
+        <div class="gb-card" style="margin-bottom:0.75rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                <span style="font-size:0.85rem; color:var(--gb-muted);">@(rating.User?.FullName ?? "Anonymous")</span>
+                <div style="display:flex; gap:1rem;">
+                    <span style="font-size:0.85rem; color:var(--gb-gold);">
+                        Food: @rating.MenuItemScore/5
+                    </span>
+                    <span style="font-size:0.85rem; color:var(--gb-orange);">
+                        Service: @rating.CatererScore/5
+                    </span>
+                </div>
+            </div>
+            @if (!string.IsNullOrEmpty(rating.Comment))
+            {
+                <p style="font-size:0.875rem; color:var(--gb-text);">@rating.Comment</p>
+            }
+        </div>
+    }
+}

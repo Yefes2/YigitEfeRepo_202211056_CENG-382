@@ -16,59 +16,172 @@
 }
 else
 {
-    @foreach (var order in Model)
-    {
-        <div class="gb-card" style="margin-bottom:1rem;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                <div>
-                    <span style="font-family:var(--font-display); font-size:1.2rem;">
-                        Order #@order.Id
-                    </span>
-                    <span style="color:var(--gb-muted); font-size:0.82rem; margin-left:0.75rem;">
-                        @order.CreatedAt.ToString("dd MMM yyyy, HH:mm")
-                    </span>
+    <div class="gb-filter-bar">
+        <input type="text" id="searchInput" class="gb-input" placeholder="Search by order #..." />
+        <select id="statusFilter" class="gb-input">
+            <option value="">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="Completed">Completed</option>
+        </select>
+        <span id="resultCount" style="color:var(--gb-muted); font-size:0.875rem; align-self:center;"></span>
+    </div>
+
+    <div id="ordersContainer">
+        @foreach (var order in Model)
+        {
+            <div class="gb-order-card gb-card"
+                 data-id="@order.Id"
+                 data-status="@order.Status"
+                 style="margin-bottom:1rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                    <div>
+                        <span style="font-family:var(--font-display); font-size:1.2rem;">
+                            Order #@order.Id
+                        </span>
+                        <span style="color:var(--gb-muted); font-size:0.82rem; margin-left:0.75rem;">
+                            @order.CreatedAt.ToString("dd MMM yyyy, HH:mm")
+                        </span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:1rem;">
+                        <span class="gb-badge @(order.Status == "Completed" ? "gb-badge--completed" : "gb-badge--pending")">
+                            @order.Status
+                        </span>
+                        <span style="font-family:var(--font-display); font-size:1.3rem; color:var(--gb-orange);">
+                            ₺@order.TotalAmount.ToString("0.00")
+                        </span>
+                    </div>
                 </div>
-                <div style="display:flex; align-items:center; gap:1rem;">
-                    <span class="gb-badge @(order.Status == "Completed" ? "gb-badge--completed" : "gb-badge--pending")">
-                        @order.Status
-                    </span>
-                    <span style="font-family:var(--font-display); font-size:1.3rem; color:var(--gb-orange);">
-                        ₺@order.TotalAmount.ToString("0.00")
-                    </span>
+
+                <table class="gb-table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Qty</th>
+                            <th>Unit Price</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in order.OrderItems)
+                        {
+                            <tr>
+                                <td>@item.MenuItem?.Title</td>
+                                <td>@item.Quantity</td>
+                                <td>₺@item.UnitPrice.ToString("0.00")</td>
+                                <td style="color:var(--gb-gold);">
+                                    ₺@((item.UnitPrice * item.Quantity).ToString("0.00"))
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <div style="display:flex; gap:0.75rem; margin-top:0.75rem; flex-wrap:wrap;">
+                    <a asp-action="DownloadReceipt" asp-route-orderId="@order.Id"
+                       class="gb-btn gb-btn--outline">Download Receipt</a>
+                    <a asp-action="DownloadAgreement" asp-route-orderId="@order.Id"
+                       class="gb-btn gb-btn--outline">Download Agreement</a>
+
+
+                    <form asp-controller="Cart" asp-action="Reorder" asp-route-orderId="@order.Id" method="post">
+                        <button type="submit" class="gb-btn gb-btn--outline">Reorder</button>
+                    </form>
+                    @if (order.Status == "Completed")
+                    {
+                        <a asp-action="Rate" asp-route-orderId="@order.Id"
+                           class="gb-btn gb-btn--outline">Rate This Order</a>
+                    }
                 </div>
             </div>
+        }
+    </div>
 
-            <table class="gb-table">
+    <div id="noResults" style="display:none; text-align:center; padding:2rem; color:var(--gb-muted);">
+        No orders match your search.
+    </div>
 
-                <thead>
-                    <tr>
-                        <th>Item</th>
-                        <th>Qty</th>
-                        <th>Unit Price</th>
-                        <th>Subtotal</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in order.OrderItems)
-                    {
-                        <tr>
-                            <td>@item.MenuItem?.Title</td>
-                            <td>@item.Quantity</td>
-                            <td>₺@item.UnitPrice.ToString("0.00")</td>
-                            <td style="color:var(--gb-gold);">
-                                ₺@((item.UnitPrice * item.Quantity).ToString("0.00"))
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-            @if (order.Status == "Completed")
-            {
-                <div style="margin-top:0.75rem;">
-                    <a asp-action="Rate" asp-route-orderId="@order.Id"
-                       class="gb-btn gb-btn--outline">Rate This Order</a>
-                </div>
+    <div class="gb-pagination" id="pagination"></div>
+}
+
+@section Scripts {
+    <script>
+        const ROWS_PER_PAGE = 5;
+        let currentPage = 1;
+        let filteredCards = [];
+
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const allCards = Array.from(document.querySelectorAll('.gb-order-card'));
+        const noResults = document.getElementById('noResults');
+        const resultCount = document.getElementById('resultCount');
+        const pagination = document.getElementById('pagination');
+
+        function applyFilters() {
+            const search = searchInput.value.toLowerCase().trim();
+            const status = statusFilter.value;
+
+            filteredCards = allCards.filter(card => {
+                const idMatch = card.dataset.id.includes(search);
+                const statusMatch = !status || card.dataset.status === status;
+                return idMatch && statusMatch;
+            });
+
+            currentPage = 1;
+            render();
+        }
+
+        function render() {
+            allCards.forEach(c => c.style.display = 'none');
+
+            if (filteredCards.length === 0) {
+                noResults.style.display = 'block';
+                pagination.innerHTML = '';
+                resultCount.textContent = '0 orders';
+                return;
             }
-        </div>
-    }
+
+            noResults.style.display = 'none';
+
+            const totalPages = Math.ceil(filteredCards.length / ROWS_PER_PAGE);
+            const start = (currentPage - 1) * ROWS_PER_PAGE;
+            const end = start + ROWS_PER_PAGE;
+
+            filteredCards.slice(start, end).forEach(c => c.style.display = '');
+            resultCount.textContent = `${filteredCards.length} order${filteredCards.length !== 1 ? 's' : ''}`;
+
+            renderPagination(totalPages);
+        }
+
+        function renderPagination(totalPages) {
+            pagination.innerHTML = '';
+            if (totalPages <= 1) return;
+
+            const prev = document.createElement('button');
+            prev.textContent = '←';
+            prev.className = 'gb-btn gb-btn--ghost gb-pagination__btn';
+            prev.disabled = currentPage === 1;
+            prev.onclick = () => { currentPage--; render(); };
+            pagination.appendChild(prev);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                btn.className = 'gb-btn gb-btn--ghost gb-pagination__btn' + (i === currentPage ? ' gb-pagination__btn--active' : '');
+                btn.onclick = () => { currentPage = i; render(); };
+                pagination.appendChild(btn);
+            }
+
+            const next = document.createElement('button');
+            next.textContent = '→';
+            next.className = 'gb-btn gb-btn--ghost gb-pagination__btn';
+            next.disabled = currentPage === totalPages;
+            next.onclick = () => { currentPage++; render(); };
+            pagination.appendChild(next);
+        }
+
+        searchInput.addEventListener('input', applyFilters);
+        statusFilter.addEventListener('change', applyFilters);
+
+        applyFilters();
+    </script>
 }

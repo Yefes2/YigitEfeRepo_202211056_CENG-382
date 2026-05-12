@@ -1,5 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Admin Dashboard";
+    var revenueDays = ViewBag.RevenueDays as List<string> ?? new();
+    var revenueValues = ViewBag.RevenueValues as List<decimal> ?? new();
 }
 
 <div class="gb-page-header">
@@ -10,18 +12,64 @@
 <div class="gb-stat-grid">
     <div class="gb-card gb-stat-card">
         <p class="gb-stat-label">Total Users</p>
-        <p class="gb-stat-value">—</p>
+        <p class="gb-stat-value">@(ViewBag.TotalUsers ?? "—")</p>
     </div>
     <div class="gb-card gb-stat-card">
         <p class="gb-stat-label">Total Orders</p>
-        <p class="gb-stat-value">—</p>
+        <p class="gb-stat-value">@(ViewBag.TotalOrders ?? "—")</p>
+    </div>
+    <div class="gb-card gb-stat-card">
+        <p class="gb-stat-label">Total Revenue</p>
+        <p class="gb-stat-value" style="font-size:1.8rem;">
+            ₺@(((decimal?)ViewBag.TotalRevenue)?.ToString("0.00") ?? "—")
+        </p>
     </div>
     <div class="gb-card gb-stat-card">
         <p class="gb-stat-label">Active Caterers</p>
-        <p class="gb-stat-value">—</p>
+        <p class="gb-stat-value">@(ViewBag.TotalCaterers ?? "—")</p>
     </div>
     <div class="gb-card gb-stat-card">
         <p class="gb-stat-label">Menu Items</p>
-        <p class="gb-stat-value">—</p>
+        <p class="gb-stat-value">@(ViewBag.TotalItems ?? "—")</p>
     </div>
 </div>
+
+<div class="gb-card" style="padding:1.5rem; margin-top:1rem;">
+    <p style="font-family:var(--font-display); font-size:1.1rem; margin-bottom:1rem;">
+        Revenue — Last 7 Days
+    </p>
+    <canvas id="revenueChart" height="100"></canvas>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        Chart.defaults.color = '#888880';
+        Chart.defaults.borderColor = '#333333';
+
+        new Chart(document.getElementById('revenueChart'), {
+        type: 'line',
+        data: {
+        labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(revenueDays)),
+        datasets: [{
+        label: 'Revenue (₺)',
+        data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(revenueValues)),
+        borderColor: '#FF6B35',
+        backgroundColor: '#FF6B3522',
+        borderWidth: 2,
+        pointBackgroundColor: '#FF6B35',
+        tension: 0.3,
+        fill: true
+        }]
+        },
+        options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+        x: { grid: { color: '#333' } },
+        y: { grid: { color: '#333' }, beginAtZero: true }
+        }
+        }
+        });
+    </script>
+}

@@ -28,8 +28,13 @@
                     <input asp-for="RememberMe" type="checkbox" /> Remember me
                 </label>
             </div>
-
+            <div class="g-recaptcha" data-sitekey="@ViewData["ReCaptchaSiteKey"]" style="margin-bottom:1rem;"></div>
             <button type="submit" class="gb-btn gb-btn--primary gb-btn--full">Sign In</button>
+            <div style="text-align:center; margin-top:0.75rem;">
+                <a asp-action="ForgotPassword" style="color:var(--gb-muted); font-size:0.875rem;">
+                    Forgot your password?
+                </a>
+            </div>
         </form>
 
         <p class="gb-auth-footer">
@@ -37,3 +42,9 @@
         </p>
     </div>
 </div>
+
+
+
+@section Scripts {
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+}

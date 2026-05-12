@@ -1,5 +1,9 @@
 ﻿@{
     ViewData["Title"] = "Caterer Dashboard";
+    var revenueDays = ViewBag.RevenueDays as List<string> ?? new();
+    var revenueValues = ViewBag.RevenueValues as List<decimal> ?? new();
+    var itemLabels = ViewBag.ItemLabels as List<string> ?? new();
+    var itemCounts = ViewBag.ItemCounts as List<int> ?? new();
 }
 
 <div class="gb-page-header">
@@ -10,14 +14,99 @@
 <div class="gb-stat-grid">
     <div class="gb-card gb-stat-card">
         <p class="gb-stat-label">Menu Items</p>
-        <p class="gb-stat-value">—</p>
+        <p class="gb-stat-value">@(ViewBag.MenuItemCount ?? "—")</p>
     </div>
     <div class="gb-card gb-stat-card">
         <p class="gb-stat-label">Total Orders</p>
-        <p class="gb-stat-value">—</p>
+        <p class="gb-stat-value">@(ViewBag.TotalOrders ?? "—")</p>
+    </div>
+    <div class="gb-card gb-stat-card">
+        <p class="gb-stat-label">Total Revenue</p>
+        <p class="gb-stat-value" style="font-size:1.8rem;">
+            ₺@(((decimal?)ViewBag.TotalRevenue)?.ToString("0.00") ?? "—")
+        </p>
     </div>
     <div class="gb-card gb-stat-card">
         <p class="gb-stat-label">Avg Rating</p>
-        <p class="gb-stat-value">—</p>
+        <p class="gb-stat-value">@(ViewBag.AvgRating ?? "—")</p>
     </div>
 </div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; margin-top:1rem;">
+    <div class="gb-card" style="padding:1.5rem;">
+        <p style="font-family:var(--font-display); font-size:1.1rem; margin-bottom:1rem;">
+            Revenue — Last 7 Days
+        </p>
+        <canvas id="revenueChart" height="200"></canvas>
+    </div>
+    <div class="gb-card" style="padding:1.5rem;">
+        <p style="font-family:var(--font-display); font-size:1.1rem; margin-bottom:1rem;">
+            Orders per Item
+        </p>
+        <canvas id="itemChart" height="200"></canvas>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        const orange = '#FF6B35';
+        const gold = '#FFB347';
+        const dark3 = '#2E2E2E';
+        const muted = '#888880';
+        const text = '#F0EDE8';
+
+        Chart.defaults.color = muted;
+        Chart.defaults.borderColor = '#333333';
+
+        // Revenue line chart
+        new Chart(document.getElementById('revenueChart'), {
+        type: 'line',
+        data: {
+        labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(revenueDays)),
+        datasets: [{
+        label: 'Revenue (₺)',
+        data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(revenueValues)),
+        borderColor: orange,
+        backgroundColor: orange + '22',
+        borderWidth: 2,
+        pointBackgroundColor: orange,
+        tension: 0.3,
+        fill: true
+        }]
+        },
+        options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+        x: { grid: { color: '#333' } },
+        y: { grid: { color: '#333' }, beginAtZero: true }
+        }
+        }
+        });
+
+        // Orders per item bar chart
+        new Chart(document.getElementById('itemChart'), {
+        type: 'bar',
+        data: {
+        labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(itemLabels)),
+        datasets: [{
+        label: 'Orders',
+        data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(itemCounts)),
+        backgroundColor: gold + 'CC',
+        borderColor: gold,
+        borderWidth: 1,
+        borderRadius: 4
+        }]
+        },
+        options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+        x: { grid: { color: '#333' } },
+        y: { grid: { color: '#333' }, beginAtZero: true, ticks: { stepSize: 1 } }
+        }
+        }
+        });
+    </script>
+}

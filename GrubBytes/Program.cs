@@ -33,7 +33,9 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CartService>();
 builder.Services.AddScoped<LogService>();
 builder.Services.AddScoped<EmailService>();
-
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+builder.Services.AddScoped<PdfService>();
+builder.Services.AddHttpClient();
 
 
 var app = builder.Build();
@@ -125,7 +127,8 @@ using (var scope = app.Services.CreateScope())
                 Title = "Spicy Chicken Wrap",
                 Description = "Crispy chicken with sriracha mayo and fresh veggies.",
                 Price = 89.90m,
-                IsAvailable = true
+                IsAvailable = true,
+                ImagePath = "/uploads/menu/spicy-chicken-wrap.jpg"
             },
             new GrubBytes.Models.MenuItem
             {
@@ -133,7 +136,8 @@ using (var scope = app.Services.CreateScope())
                 Title = "Smash Burger",
                 Description = "Double smashed patty with caramelized onions and pickles.",
                 Price = 129.90m,
-                IsAvailable = true
+                IsAvailable = true,
+                ImagePath = "/uploads/menu/smash-burger.jpg"
             },
             new GrubBytes.Models.MenuItem
             {
@@ -141,7 +145,8 @@ using (var scope = app.Services.CreateScope())
                 Title = "Street Fries",
                 Description = "Crispy fries with house seasoning and dipping sauce.",
                 Price = 49.90m,
-                IsAvailable = true
+                IsAvailable = true,
+                ImagePath = "/uploads/menu/street-fries.jpg"
             }
         );
         await db.SaveChangesAsync();

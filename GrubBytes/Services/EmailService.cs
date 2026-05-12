@@ -52,5 +52,27 @@ namespace GrubBytes.Services
 
             await SendAsync(toEmail, toName, $"GrubBytes — Order #{orderId} Confirmed", html);
         }
+
+        public async Task SendPasswordResetAsync(string toEmail, string name, string resetLink)
+        {
+            var html = $@"
+        <div style='font-family:sans-serif; max-width:480px; margin:auto;'>
+            <h2 style='color:#FF6B35;'>Password Reset</h2>
+            <p>Hey {name},</p>
+            <p>Click the button below to reset your GrubBytes password.
+               This link expires in <strong>24 hours</strong>.</p>
+            <a href='{resetLink}'
+               style='display:inline-block; padding:12px 24px; background:#FF6B35;
+                      color:#fff; border-radius:6px; text-decoration:none;
+                      font-weight:bold; margin:1rem 0;'>
+                Reset My Password
+            </a>
+            <p style='color:#888; font-size:0.85rem;'>
+                If you didn't request this, ignore this email.
+            </p>
+        </div>";
+
+            await SendAsync(toEmail, name, "GrubBytes — Password Reset", html);
+        }
     }
 }
