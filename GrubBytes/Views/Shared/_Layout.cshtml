@@ -17,7 +17,7 @@
             <a href="/" class="gb-navbar__logo">Grub<span>Bytes</span></a>
         </div>
         <div class="gb-navbar__links">
-            <a href="/Menu">Menu</a>
+            <a href="/">Menu</a>
             <a href="/About">About</a>
             <a href="/Home/NearMe">Near Me</a>
         </div>
@@ -66,9 +66,9 @@
                     <svg class="gb-sidebar__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
                     Home
                 </a>
-                <a href="/Menu" class="gb-sidebar__link">
+                <a href="/Home/NearMe" class="gb-sidebar__link">
                     <svg class="gb-sidebar__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z" /><path d="M12 8v4l3 3" /></svg>
-                    Menu
+                    Near Me
                 </a>
             </div>
 
@@ -147,7 +147,7 @@
             <p>Your neighborhood, your flavor.</p>
         </div>
         <div class="gb-footer__links">
-            <a href="/Menu">Menu</a>
+            <a href="/">Menu</a>
             <a href="/About">About</a>
             <a href="/Contact">Contact</a>
         </div>
@@ -175,7 +175,10 @@
         const currentPath = window.location.pathname.toLowerCase();
         document.querySelectorAll('.gb-sidebar__link').forEach(link => {
         const href = link.getAttribute('href')?.toLowerCase();
-        if (href && (currentPath === href || (href !== '/' && currentPath.startsWith(href)))) {
+        if (!href) return;
+        const isExact = currentPath === href;
+        const isChild = href !== '/' && href !== '/cart' && href !== '/user' && currentPath.startsWith(href);
+        if (isExact || isChild) {
         link.classList.add('gb-sidebar__link--active');
         }
         });

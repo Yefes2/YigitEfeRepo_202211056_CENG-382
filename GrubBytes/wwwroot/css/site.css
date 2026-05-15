@@ -696,3 +696,115 @@ body.gb-light {
     align-items: center;
     justify-content: center;
 }
+
+
+/* ── CARD ── */
+.gb-card {
+    background: var(--gb-dark2);
+    border: 1px solid var(--gb-border);
+    border-radius: 10px;
+    padding: 1.5rem;
+}
+
+/* ── TABLE ── */
+.gb-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+
+    .gb-table th {
+        text-align: left;
+        padding: 0.65rem 1rem;
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--gb-muted);
+        border-bottom: 1px solid var(--gb-border);
+        white-space: nowrap;
+    }
+
+    .gb-table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--gb-border);
+        vertical-align: middle;
+        line-height: 1.5;
+    }
+
+    .gb-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .gb-table tbody tr:hover {
+        background: var(--gb-dark3);
+    }
+
+/* ── BADGES ── */
+.gb-badge {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.gb-badge--completed {
+    background: #2ecc7122;
+    color: #2ECC71;
+    border: 1px solid #2ecc7144;
+}
+
+.gb-badge--pending {
+    background: #ffb34722;
+    color: #FFB347;
+    border: 1px solid #ffb34744;
+}
+
+.gb-badge--cancelled {
+    background: #e74c3c22;
+    color: #e74c3c;
+    border: 1px solid #e74c3c44;
+}
+
+/* ── ALERT ── */
+.gb-alert {
+    padding: 0.75rem 1rem;
+    border-radius: 7px;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}
+
+.gb-alert--success {
+    background: #2ecc7122;
+    border: 1px solid #2ecc7144;
+    color: #2ECC71;
+}
+
+.gb-alert--error {
+    background: #e74c3c22;
+    border: 1px solid #e74c3c44;
+    color: #e74c3c;
+}
+
+/* ── GHOST BUTTON ── */
+.gb-btn--ghost {
+    background: transparent;
+    border: 1px solid var(--gb-border);
+    color: var(--gb-muted);
+}
+
+    .gb-btn--ghost:hover {
+        border-color: var(--gb-orange);
+        color: var(--gb-orange);
+    }
+
+/* ── LABEL ── */
+.gb-label {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--gb-muted);
+}

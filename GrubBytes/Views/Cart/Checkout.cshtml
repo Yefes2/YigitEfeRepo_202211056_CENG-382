@@ -33,7 +33,7 @@
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
                 <div class="gb-form-group">
                     <label asp-for="Expiry">Expiry</label>
-                    <input asp-for="Expiry" class="gb-input" placeholder="MM/YY" />
+                    <input asp-for="Expiry" id="expiryInput" class="gb-input" placeholder="MM/YY" maxlength="5" />
                     <span asp-validation-for="Expiry" class="gb-field-error"></span>
                 </div>
                 <div class="gb-form-group">
@@ -66,3 +66,64 @@
         </div>
     </div>
 </div>
+
+
+
+@section Scripts {
+    <script>
+        const expiry = document.getElementById('expiryInput');
+
+        expiry.addEventListener('input', function (e) {
+            let val = this.value.replace(/\D/g, '');
+            if (val.length >= 3) {
+                val = val.substring(0, 2) + '/' + val.substring(2, 4);
+            }
+            this.value = val;
+        });
+
+        expiry.addEventListener('keydown', function (e) {
+            if (e.key === 'Backspace' && this.value.endsWith('/')) {
+                this.value = this.value.slice(0, -1);
+            }
+        });
+
+        const form = expiry.closest('form');
+
+        form.addEventListener('submit', function (e) {
+            const val = expiry.value;
+            const parts = val.split('/');
+            const btn = form.querySelector('button[type="submit"]');
+
+            function rejectWithToast(msg) {
+                e.preventDefault();
+                // Reset spinner
+                btn.classList.remove('gb-btn--loading');
+                btn.innerHTML = 'Confirm Payment';
+                showToast(msg, 'error');
+                expiry.focus();
+            }
+
+            if (parts.length !== 2 || parts[0].length !== 2 || parts[1].length !== 2) {
+                rejectWithToast('Please enter a valid expiry date (MM/YY).');
+                return;
+            }
+
+            const month = parseInt(parts[0]);
+            const year = parseInt('20' + parts[1]);
+
+            if (month < 1 || month > 12) {
+                rejectWithToast('Invalid month in expiry date.');
+                return;
+            }
+
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth() + 1;
+
+            if (year < currentYear || (year === currentYear && month < currentMonth)) {
+                rejectWithToast('Your card has expired.');
+                return;
+            }
+        });
+    </script>
+}

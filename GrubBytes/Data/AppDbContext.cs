@@ -121,7 +121,7 @@ namespace GrubBytes.Data
                 .HasOne(f => f.MenuItem)
                 .WithMany()
                 .HasForeignKey(f => f.MenuItemId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Prevent duplicate favorites
             builder.Entity<Favorite>()

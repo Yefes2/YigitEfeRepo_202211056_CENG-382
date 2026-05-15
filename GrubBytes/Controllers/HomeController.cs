@@ -71,5 +71,8 @@ namespace GrubBytes.Controllers
             ViewBag.Ratings = ratings;
             return View(caterer);
         }
+
+        public IActionResult Menu() => RedirectToAction("Index");
+
     }
 }

@@ -140,5 +140,42 @@ namespace GrubBytes.Controllers
 
             return RedirectToAction("Menu");
         }
+
+        public async Task<IActionResult> Orders()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var profile = await _db.CatererProfiles
+                .FirstOrDefaultAsync(c => c.UserId == user!.Id);
+
+            if (profile == null) return View(new List<Order>());
+
+            var orders = await _db.Orders
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.MenuItem)
+                .Where(o => o.CatererId == profile.Id)
+                .OrderByDescending(o => o.CreatedAt)
+                .ToListAsync();
+
+            return View(orders);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateOrderStatus(int orderId, string status)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var profile = await _db.CatererProfiles
+                .FirstOrDefaultAsync(c => c.UserId == user!.Id);
+
+            var order = await _db.Orders
+                .FirstOrDefaultAsync(o => o.Id == orderId && o.CatererId == profile!.Id);
+
+            if (order == null) return NotFound();
+
+            order.Status = status;
+            await _db.SaveChangesAsync();
+
+            return RedirectToAction("Orders");
+        }
     }
 }
