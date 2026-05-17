@@ -22,22 +22,27 @@ namespace GrubBytes.Controllers
         public async Task<IActionResult> Dashboard()
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login", "Account");
+
+            var userId = user.Id;
 
             var orders = await _db.Orders
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.MenuItem)
                 .Include(o => o.Caterer)
-                .Where(o => o.UserId == user!.Id)
+                .Where(o => o.UserId == userId)
                 .OrderByDescending(o => o.CreatedAt)
                 .ToListAsync();
 
             var favorites = await _db.Favorites
                 .Include(f => f.MenuItem)
                     .ThenInclude(m => m.Caterer)
-                .Where(f => f.UserId == user!.Id)
+                .Where(f => f.UserId == userId)
                 .ToListAsync();
 
-            var totalSpent = orders.Sum(o => o.TotalAmount);
+            var totalSpent = orders
+                .Where(o => o.Status != "Denied")
+                .Sum(o => o.TotalAmount);
             var completedOrders = orders.Count(o => o.Status == "Completed");
             var pendingOrders = orders.Count(o => o.Status == "Pending");
 

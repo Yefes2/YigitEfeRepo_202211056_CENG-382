@@ -74,5 +74,43 @@ namespace GrubBytes.Services
 
             await SendAsync(toEmail, name, "GrubBytes — Password Reset", html);
         }
+
+        public async Task SendOrderDeniedAsync(string toEmail, string toName,
+        int orderId, decimal total, string reason)
+        {
+            var html = $@"
+        <div style='font-family:sans-serif; max-width:500px; margin:auto;'>
+            <h2 style='color:#e74c3c;'>GrubBytes — Order Denied</h2>
+            <p>Hi {toName},</p>
+            <p>Unfortunately your order <strong>#{orderId}</strong> has been denied by the caterer.</p>
+            <div style='background:#e74c3c22; border:1px solid #e74c3c44; border-radius:6px;
+                        padding:12px 16px; margin:1rem 0;'>
+                <strong style='color:#e74c3c;'>Reason:</strong>
+                <p style='margin:4px 0 0; color:#444;'>{reason}</p>
+            </div>
+            <p>Total of <strong>₺{total:0.00}</strong> will not be charged.</p>
+            <p style='color:#888;'>We apologize for the inconvenience.</p>
+        </div>";
+
+            await SendAsync(toEmail, toName, $"GrubBytes — Order #{orderId} Denied", html);
+        }
+
+        public async Task SendOrderCompletedAsync(string toEmail, string toName,
+            int orderId, decimal total)
+        {
+            var html = $@"
+        <div style='font-family:sans-serif; max-width:500px; margin:auto;'>
+            <h2 style='color:#2ECC71;'>GrubBytes — Order Completed!</h2>
+            <p>Hi {toName},</p>
+            <p>Your order <strong>#{orderId}</strong> has been marked as completed.</p>
+            <p style='font-size:1.1rem;'>
+                <strong>Total: ₺{total:0.00}</strong>
+            </p>
+            <p>You can now rate your experience from your Order History page.</p>
+            <p style='color:#888;'>Thank you for ordering with GrubBytes!</p>
+        </div>";
+
+            await SendAsync(toEmail, toName, $"GrubBytes — Order #{orderId} Completed", html);
+        }
     }
 }

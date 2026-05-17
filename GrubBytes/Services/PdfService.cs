@@ -219,5 +219,136 @@ namespace GrubBytes.Services
                 });
             }).GeneratePdf();
         }
+
+        public byte[] GenerateDenialNotice(Order order)
+        {
+            return Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(40);
+                    page.DefaultTextStyle(x => x.FontSize(11).FontFamily("Arial"));
+
+                    page.Header().Column(col =>
+                    {
+                        col.Item().Row(row =>
+                        {
+                            row.RelativeItem().Column(c =>
+                            {
+                                c.Item().Text("GrubBytes")
+                                    .FontSize(28).Bold().FontColor("#FF6B35");
+                                c.Item().Text("Your neighborhood, your flavor.")
+                                    .FontSize(10).FontColor("#888880");
+                            });
+                            row.ConstantItem(150).AlignRight().Column(c =>
+                            {
+                                c.Item().Text("ORDER DENIED")
+                                    .FontSize(14).Bold().FontColor("#e74c3c");
+                                c.Item().Text($"#{order.Id}")
+                                    .FontSize(20).Bold().FontColor("#FF6B35");
+                            });
+                        });
+                        col.Item().PaddingTop(10).LineHorizontal(1).LineColor("#E0E0E0");
+                    });
+
+                    page.Content().PaddingTop(20).Column(col =>
+                    {
+                        col.Item().Text("Order Details").FontSize(13).Bold();
+                        col.Item().PaddingTop(4).Text($"Order ID: #{order.Id}");
+                        col.Item().Text($"Date: {order.CreatedAt:dd MMM yyyy, HH:mm}");
+                        col.Item().Text($"Customer: {order.User?.FullName ?? "—"}");
+                        col.Item().Text($"Email: {order.User?.Email ?? "—"}").FontColor("#888880");
+
+                        col.Item().PaddingTop(20).Text("Items Ordered").FontSize(13).Bold();
+                        col.Item().PaddingTop(8).Table(table =>
+                        {
+                            table.ColumnsDefinition(cols =>
+                            {
+                                cols.RelativeColumn(3);
+                                cols.RelativeColumn(1);
+                                cols.RelativeColumn(1);
+                                cols.RelativeColumn(1);
+                            });
+
+                            table.Header(header =>
+                            {
+                                header.Cell().Background("#e74c3c").Padding(8)
+                                    .Text("Item").FontColor("#FFFFFF").Bold();
+                                header.Cell().Background("#e74c3c").Padding(8)
+                                    .Text("Qty").FontColor("#FFFFFF").Bold();
+                                header.Cell().Background("#e74c3c").Padding(8)
+                                    .Text("Unit Price").FontColor("#FFFFFF").Bold();
+                                header.Cell().Background("#e74c3c").Padding(8)
+                                    .Text("Subtotal").FontColor("#FFFFFF").Bold();
+                            });
+
+                            var rowColor = false;
+                            foreach (var item in order.OrderItems)
+                            {
+                                var bg = rowColor ? "#F9F9F9" : "#FFFFFF";
+                                table.Cell().Background(bg).Padding(8)
+                                    .Text(item.MenuItem?.Title ?? "—");
+                                table.Cell().Background(bg).Padding(8)
+                                    .Text(item.Quantity.ToString());
+                                table.Cell().Background(bg).Padding(8)
+                                    .Text($"₺{item.UnitPrice:0.00}");
+                                table.Cell().Background(bg).Padding(8)
+                                    .Text($"₺{(item.UnitPrice * item.Quantity):0.00}");
+                                rowColor = !rowColor;
+                            }
+                        });
+
+                        col.Item().PaddingTop(16).AlignRight().Text(text =>
+                        {
+                            text.Span("Order Total: ").FontSize(14).Bold();
+                            text.Span($"₺{order.TotalAmount:0.00}")
+                                .FontSize(16).Bold().FontColor("#e74c3c");
+                        });
+
+                        col.Item().PaddingTop(30).LineHorizontal(1).LineColor("#E0E0E0");
+
+                        col.Item().PaddingTop(20).Text("Denial Reason").FontSize(13).Bold()
+                            .FontColor("#e74c3c");
+                        col.Item().PaddingTop(8).Text(
+                            string.IsNullOrEmpty(order.DenialReason)
+                                ? "No reason provided."
+                                : order.DenialReason)
+                            .FontColor("#444444");
+
+                        col.Item().PaddingTop(30).LineHorizontal(1).LineColor("#E0E0E0");
+
+                        col.Item().PaddingTop(20).Row(row =>
+                        {
+                            row.RelativeItem().Column(c =>
+                            {
+                                c.Item().Text("Caterer Signature").Bold();
+                                c.Item().PaddingTop(30).LineHorizontal(1).LineColor("#AAAAAA");
+                                c.Item().PaddingTop(4).Text(order.Caterer?.BusinessName ?? "—")
+                                    .FontColor("#888880");
+                            });
+                            row.ConstantItem(50);
+                            row.RelativeItem().Column(c =>
+                            {
+                                c.Item().Text("Customer").Bold();
+                                c.Item().PaddingTop(30).LineHorizontal(1).LineColor("#AAAAAA");
+                                c.Item().PaddingTop(4).Text(order.User?.FullName ?? "—")
+                                    .FontColor("#888880");
+                            });
+                        });
+                    });
+
+                    page.Footer().AlignCenter().Text(text =>
+                    {
+                        text.Span($"Order #{order.Id} · Denied · ")
+                            .FontSize(9).FontColor("#AAAAAA");
+                        text.Span(DateTime.UtcNow.ToString("dd MMM yyyy"))
+                            .FontSize(9).FontColor("#AAAAAA");
+                        text.Span(" · GrubBytes © 2026")
+                            .FontSize(9).FontColor("#AAAAAA");
+                    });
+                });
+            }).GeneratePdf();
+        }
     }
 }

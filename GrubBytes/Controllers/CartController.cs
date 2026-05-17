@@ -19,8 +19,6 @@ namespace GrubBytes.Controllers
         private readonly EmailService _emailService;
         private readonly PdfService _pdfService;
         
-
-
         public CartController(CartService cartService, AppDbContext db,
             UserManager<ApplicationUser> userManager, LogService logService, EmailService emailService,
             PdfService pdfService)
@@ -318,5 +316,21 @@ namespace GrubBytes.Controllers
             await _db.SaveChangesAsync();
             return RedirectToAction("Index", "Home");
         }
+        public async Task<IActionResult> DownloadDenialNotice(int orderId)
+        {
+            var order = await _db.Orders
+                .Include(o => o.User)
+                .Include(o => o.Caterer)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.MenuItem)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null) return NotFound();
+
+            var pdf = _pdfService.GenerateDenialNotice(order);
+            return File(pdf, "application/pdf", $"GrubBytes_DenialNotice_Order{orderId}.pdf");
+        }
+
+
     }
 }

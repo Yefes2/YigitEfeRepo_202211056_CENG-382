@@ -60,8 +60,8 @@ namespace GrubBytes.Data
 
             builder.Entity<CatererProfile>()
                 .HasOne(c => c.User)
-                .WithOne(u => u.CatererProfile)
-                .HasForeignKey<CatererProfile>(c => c.UserId);
+                .WithMany()
+                .HasForeignKey(c => c.UserId);
 
             builder.Entity<Order>()
                 .HasOne(o => o.User)

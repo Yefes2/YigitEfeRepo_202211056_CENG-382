@@ -11,9 +11,12 @@ namespace GrubBytes.Models
         public string Address { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        public CatererProfile? CatererProfile { get; set; }
+        public ICollection<CatererProfile> CatererProfiles { get; set; } = new List<CatererProfile>();
         public ICollection<Order> Orders { get; set; } = new List<Order>();
         public ICollection<Rating> Ratings { get; set; } = new List<Rating>();
         public ICollection<Log> Logs { get; set; } = new List<Log>();
+
+        public string? ProfileImagePath { get; set; }
+
     }
 }

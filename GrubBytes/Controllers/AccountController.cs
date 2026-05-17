@@ -214,5 +214,84 @@ namespace GrubBytes.Controllers
             var json = await response.Content.ReadAsStringAsync();
             return json.Contains("\"success\": true");
         }
+
+        [HttpGet]
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        public async Task<IActionResult> Profile()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login");
+            return View(user);
+        }
+
+        [HttpPost]
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Profile(string fullName, string? currentPassword,
+            string? newPassword, string? croppedImage)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login");
+
+            // Update full name
+            if (!string.IsNullOrEmpty(fullName) && fullName != user.FullName)
+            {
+                user.FullName = fullName;
+            }
+
+            // Update password
+            if (!string.IsNullOrEmpty(currentPassword) && !string.IsNullOrEmpty(newPassword))
+            {
+                var passwordResult = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+                if (!passwordResult.Succeeded)
+                {
+                    TempData["Error"] = string.Join(" ", passwordResult.Errors.Select(e => e.Description));
+                    return View(user);
+                }
+            }
+
+            // Save cropped profile image
+            if (!string.IsNullOrEmpty(croppedImage) && croppedImage.StartsWith("data:image"))
+            {
+                var base64 = croppedImage.Substring(croppedImage.IndexOf(',') + 1);
+                var bytes = Convert.FromBase64String(base64);
+
+                var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "avatars");
+                Directory.CreateDirectory(uploadsDir);
+
+                var fileName = $"{user.Id}.jpg";
+                var filePath = Path.Combine(uploadsDir, fileName);
+                await System.IO.File.WriteAllBytesAsync(filePath, bytes);
+
+                user.ProfileImagePath = $"/uploads/avatars/{fileName}";
+            }
+
+            await _userManager.UpdateAsync(user);
+            await _logService.LogAsync("ProfileUpdated", $"User {user.Email} updated their profile.", user.Id);
+
+            TempData["Success"] = "Profile updated successfully.";
+            return RedirectToAction("Profile");
+        }
+
+        [HttpPost]
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteAccount(string confirmEmail)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login");
+
+            if (confirmEmail != user.Email)
+            {
+                TempData["Error"] = "Email does not match. Account not deleted.";
+                return RedirectToAction("Profile");
+            }
+
+            await _signInManager.SignOutAsync();
+            await _userManager.DeleteAsync(user);
+            await _logService.LogAsync("AccountDeleted", $"Account deleted: {user.Email}");
+
+            return RedirectToAction("Index", "Home");
+        }
     }
 }

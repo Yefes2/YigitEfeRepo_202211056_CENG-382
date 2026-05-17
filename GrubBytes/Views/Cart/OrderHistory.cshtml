@@ -22,6 +22,7 @@ else
             <option value="">All Statuses</option>
             <option value="Pending">Pending</option>
             <option value="Completed">Completed</option>
+            <option value="Denied">Denied</option>
         </select>
         <span id="resultCount" style="color:var(--gb-muted); font-size:0.875rem; align-self:center;"></span>
     </div>
@@ -41,9 +42,15 @@ else
                         <span style="color:var(--gb-muted); font-size:0.82rem; margin-left:0.75rem;">
                             @order.CreatedAt.ToString("dd MMM yyyy, HH:mm")
                         </span>
+                        @if (!string.IsNullOrEmpty(order.Caterer?.BusinessName))
+                        {
+                            <span style="color:var(--gb-orange); font-size:0.82rem; margin-left:0.5rem;">
+                                — @order.Caterer.BusinessName
+                            </span>
+                        }
                     </div>
                     <div style="display:flex; align-items:center; gap:1rem;">
-                        <span class="gb-badge @(order.Status == "Completed" ? "gb-badge--completed" : "gb-badge--pending")">
+                        <span class="gb-badge @(order.Status == "Completed" ? "gb-badge--completed" : order.Status == "Denied" ? "gb-badge--cancelled" : "gb-badge--pending")">
                             @order.Status
                         </span>
                         <span style="font-family:var(--font-display); font-size:1.3rem; color:var(--gb-orange);">
@@ -81,17 +88,33 @@ else
                        class="gb-btn gb-btn--outline">Download Receipt</a>
                     <a asp-action="DownloadAgreement" asp-route-orderId="@order.Id"
                        class="gb-btn gb-btn--outline">Download Agreement</a>
-
-
-                    <form asp-controller="Cart" asp-action="Reorder" asp-route-orderId="@order.Id" method="post">
-                        <button type="submit" class="gb-btn gb-btn--outline">Reorder</button>
-                    </form>
+                    @if (order.Status == "Denied")
+                    {
+                        <a asp-action="DownloadDenialNotice" asp-route-orderId="@order.Id"
+                           class="gb-btn gb-btn--outline"
+                           style="border-color:#e74c3c; color:#e74c3c;">
+                            Download Denial Notice
+                        </a>
+                    }
+                    @if (order.Status != "Denied")
+                    {
+                        <form asp-controller="Cart" asp-action="Reorder" asp-route-orderId="@order.Id" method="post">
+                            <button type="submit" class="gb-btn gb-btn--outline">Reorder</button>
+                        </form>
+                    }
                     @if (order.Status == "Completed")
                     {
                         <a asp-action="Rate" asp-route-orderId="@order.Id"
                            class="gb-btn gb-btn--outline">Rate This Order</a>
                     }
                 </div>
+
+                @if (order.Status == "Denied" && !string.IsNullOrEmpty(order.DenialReason))
+                {
+                    <div style="margin-top:0.5rem; padding:0.5rem 0.75rem; background:#e74c3c22; border:1px solid #e74c3c44; border-radius:6px; font-size:0.85rem; color:#e74c3c;">
+                        <strong>Denied:</strong> @order.DenialReason
+                    </div>
+                }
             </div>
         }
     </div>
@@ -181,7 +204,6 @@ else
 
         searchInput.addEventListener('input', applyFilters);
         statusFilter.addEventListener('change', applyFilters);
-
         applyFilters();
     </script>
 }

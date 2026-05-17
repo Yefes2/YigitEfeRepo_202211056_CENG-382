@@ -15,5 +15,7 @@
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
         public ICollection<Rating> Ratings { get; set; } = new List<Rating>();
         public ICollection<Log> Logs { get; set; } = new List<Log>();
+        public string? DenialReason { get; set; }
+
     }
 }

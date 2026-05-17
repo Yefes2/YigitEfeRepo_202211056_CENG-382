@@ -102,55 +102,83 @@ using (var scope = app.Services.CreateScope())
         };
         await userManager.CreateAsync(caterer, "Caterer123!");
         await userManager.AddToRoleAsync(caterer, "Caterer");
-        
 
-        // Create caterer profile
-        var profile = new GrubBytes.Models.CatererProfile
-        {
-            UserId = caterer.Id,
-            BusinessName = "Street Kings",
-            Description = "Bold street food done right.",
-            Latitude = 39.9334,
-            Longitude = 32.8597
-        };
-        scope.ServiceProvider.GetRequiredService<GrubBytes.Data.AppDbContext>()
-            .CatererProfiles.Add(profile);
-        await scope.ServiceProvider.GetRequiredService<GrubBytes.Data.AppDbContext>()
-            .SaveChangesAsync();
 
-        // Seed menu items
         var db = scope.ServiceProvider.GetRequiredService<GrubBytes.Data.AppDbContext>();
-        db.MenuItems.AddRange(
-            new GrubBytes.Models.MenuItem
+
+        var districts = new[]
+        {
+    new { Name = "Altındağ",     Lat = 39.9425, Lng = 32.8947 },
+    new { Name = "Akyurt",       Lat = 40.1338, Lng = 33.0858 },
+    new { Name = "Ayaş",         Lat = 40.0186, Lng = 32.3364 },
+    new { Name = "Bala",         Lat = 39.5597, Lng = 33.1211 },
+    new { Name = "Beypazarı",    Lat = 40.1681, Lng = 31.9217 },
+    new { Name = "Çamlıdere",    Lat = 40.4933, Lng = 32.4881 },
+    new { Name = "Çankaya",      Lat = 39.9032, Lng = 32.8597 },
+    new { Name = "Çubuk",        Lat = 40.2333, Lng = 33.0333 },
+    new { Name = "Elmadağ",      Lat = 39.9167, Lng = 33.2333 },
+    new { Name = "Etimesgut",    Lat = 39.9478, Lng = 32.6761 },
+    new { Name = "Evren",        Lat = 39.0228, Lng = 33.5208 },
+    new { Name = "Gölbaşı",      Lat = 39.7883, Lng = 32.8042 },
+    new { Name = "Güdül",        Lat = 40.2167, Lng = 32.2417 },
+    new { Name = "Haymana",      Lat = 39.4333, Lng = 32.4972 },
+    new { Name = "Kahramankazan", Lat = 40.2272, Lng = 32.6878 },
+    new { Name = "Kalecik",      Lat = 40.0958, Lng = 33.4139 },
+    new { Name = "Keçiören",     Lat = 39.9975, Lng = 32.8642 },
+    new { Name = "Kızılcahamam", Lat = 40.4681, Lng = 32.6508 },
+    new { Name = "Mamak",        Lat = 39.9333, Lng = 32.9333 },
+    new { Name = "Nallıhan",     Lat = 40.1861, Lng = 31.3542 },
+    new { Name = "Polatlı",      Lat = 39.5833, Lng = 32.1472 },
+    new { Name = "Pursaklar",    Lat = 40.0333, Lng = 32.9000 },
+    new { Name = "Sincan",       Lat = 39.9736, Lng = 32.5822 },
+    new { Name = "Şereflikoçhisar", Lat = 38.9372, Lng = 33.5344 },
+    new { Name = "Yenimahalle",  Lat = 39.9667, Lng = 32.7833 },
+};
+
+        foreach (var district in districts)
+        {
+            var profile = new GrubBytes.Models.CatererProfile
             {
-                CatererId = profile.Id,
-                Title = "Spicy Chicken Wrap",
-                Description = "Crispy chicken with sriracha mayo and fresh veggies.",
-                Price = 89.90m,
-                IsAvailable = true,
-                ImagePath = "/uploads/menu/spicy-chicken-wrap.jpg"
-            },
-            new GrubBytes.Models.MenuItem
-            {
-                CatererId = profile.Id,
-                Title = "Smash Burger",
-                Description = "Double smashed patty with caramelized onions and pickles.",
-                Price = 129.90m,
-                IsAvailable = true,
-                ImagePath = "/uploads/menu/smash-burger.jpg"
-            },
-            new GrubBytes.Models.MenuItem
-            {
-                CatererId = profile.Id,
-                Title = "Street Fries",
-                Description = "Crispy fries with house seasoning and dipping sauce.",
-                Price = 49.90m,
-                IsAvailable = true,
-                ImagePath = "/uploads/menu/street-fries.jpg"
-            }
-        );
-        await db.SaveChangesAsync();
+                UserId = caterer.Id,
+                BusinessName = $"Street Kings {district.Name}",
+                Description = "Bold street food done right.",
+                Latitude = district.Lat,
+                Longitude = district.Lng
+            };
+            db.CatererProfiles.Add(profile);
+            await db.SaveChangesAsync();
+
+            db.MenuItems.AddRange(
+                new GrubBytes.Models.MenuItem
+                {
+                    CatererId = profile.Id,
+                    Title = "Spicy Chicken Wrap",
+                    Description = "Crispy chicken with sriracha mayo and fresh veggies.",
+                    Price = 89.90m,
+                    IsAvailable = true,
+                    ImagePath = "/uploads/menu/spicy-chicken-wrap.jpg"
+                },
+                new GrubBytes.Models.MenuItem
+                {
+                    CatererId = profile.Id,
+                    Title = "Smash Burger",
+                    Description = "Double smashed patty with caramelized onions and pickles.",
+                    Price = 129.90m,
+                    IsAvailable = true,
+                    ImagePath = "/uploads/menu/smash-burger.jpg"
+                },
+                new GrubBytes.Models.MenuItem
+                {
+                    CatererId = profile.Id,
+                    Title = "Street Fries",
+                    Description = "Crispy fries with house seasoning and dipping sauce.",
+                    Price = 49.90m,
+                    IsAvailable = true,
+                    ImagePath = "/uploads/menu/street-fries.jpg"
+                }
+            );
+            await db.SaveChangesAsync();
+        }
     }
 }
-
 app.Run();

@@ -24,15 +24,21 @@ namespace GrubBytes.Controllers
                 .Where(m => m.IsAvailable)
                 .ToListAsync();
 
-            // Pass favorite IDs so the view can mark which items are favorited
             if (User.IsInRole("User"))
             {
                 var user = await _userManager.GetUserAsync(User);
-                var favoriteIds = await _db.Favorites
-                    .Where(f => f.UserId == user!.Id)
-                    .Select(f => f.MenuItemId)
-                    .ToListAsync();
-                ViewBag.FavoriteIds = favoriteIds;
+                if (user != null)
+                {
+                    var favoriteIds = await _db.Favorites
+                        .Where(f => f.UserId == user.Id)
+                        .Select(f => f.MenuItemId)
+                        .ToListAsync();
+                    ViewBag.FavoriteIds = favoriteIds;
+                }
+                else
+                {
+                    ViewBag.FavoriteIds = new List<int>();
+                }
             }
             else
             {
@@ -73,6 +79,5 @@ namespace GrubBytes.Controllers
         }
 
         public IActionResult Menu() => RedirectToAction("Index");
-
     }
 }

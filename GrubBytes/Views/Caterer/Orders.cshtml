@@ -1,10 +1,10 @@
 ﻿@model List<GrubBytes.Models.Order>
 @{
-    ViewData["Title"] = "My Orders";
+    ViewData["Title"] = "Customer Orders";
 }
 
 <div class="gb-page-header">
-    <h1 class="gb-page-title">My Orders</h1>
+    <h1 class="gb-page-title">Customer Orders</h1>
 </div>
 
 @if (!Model.Any())
@@ -21,6 +21,7 @@ else
             <option value="">All Statuses</option>
             <option value="Pending">Pending</option>
             <option value="Completed">Completed</option>
+            <option value="Denied">Denied</option>
         </select>
         <span id="resultCount" style="color:var(--gb-muted); font-size:0.875rem; align-self:center;"></span>
     </div>
@@ -30,6 +31,7 @@ else
             <tr>
                 <th>Order #</th>
                 <th>Customer</th>
+                <th>Branch</th>
                 <th>Items</th>
                 <th>Total</th>
                 <th>Date</th>
@@ -44,10 +46,11 @@ else
                     data-status="@order.Status">
                     <td style="font-family:var(--font-display);">#@order.Id</td>
                     <td style="font-size:0.85rem;">@order.User?.Email</td>
+                    <td style="font-size:0.85rem; color:var(--gb-orange);">@order.Caterer?.BusinessName</td>
                     <td style="font-size:0.85rem; color:var(--gb-muted);">
                         @foreach (var item in order.OrderItems)
                         {
-                            <div>@item.MenuItem?.Title x@item.Quantity</div>
+                            <div>@item.MenuItem?.Title ×@item.Quantity</div>
                         }
                     </td>
                     <td style="color:var(--gb-gold); font-family:var(--font-display);">
@@ -57,22 +60,48 @@ else
                         @order.CreatedAt.ToString("dd MMM yyyy, HH:mm")
                     </td>
                     <td>
-                        <span class="gb-badge @(order.Status == "Completed" ? "gb-badge--completed" : "gb-badge--pending")">
+                        <span class="gb-badge @(order.Status == "Completed" ? "gb-badge--completed" : order.Status == "Denied" ? "gb-badge--cancelled" : "gb-badge--pending")">
                             @order.Status
                         </span>
                     </td>
                     <td>
-                        <form asp-action="UpdateOrderStatus" method="post" style="display:flex; gap:0.4rem;">
-                            <input type="hidden" name="orderId" value="@order.Id" />
-                            <select name="status" class="gb-input" style="font-size:0.78rem; padding:0.3rem 0.5rem; width:auto;">
-                                <option value="Pending" selected="@(order.Status == "Pending" ? "selected" : null)">Pending</option>
-                                <option value="Completed" selected="@(order.Status == "Completed" ? "selected" : null)">Completed</option>
-                            </select>
-                            <button type="submit" class="gb-btn gb-btn--primary"
-                                    style="font-size:0.78rem; padding:0.3rem 0.75rem;">
-                                Save
-                            </button>
-                        </form>
+                        @if (order.Status != "Denied")
+                        {
+                            <div style="display:flex; flex-direction:column; gap:0.4rem;">
+                                <form asp-action="UpdateOrderStatus" method="post" style="display:flex; gap:0.4rem;">
+                                    <input type="hidden" name="orderId" value="@order.Id" />
+                                    <select name="status" class="gb-input" style="font-size:0.78rem; padding:0.3rem 0.5rem; width:auto;">
+                                        <option value="Pending" selected="@(order.Status == "Pending" ? "selected" : null)">Pending</option>
+                                        <option value="Completed" selected="@(order.Status == "Completed" ? "selected" : null)">Completed</option>
+                                    </select>
+                                    <button type="submit" class="gb-btn gb-btn--primary"
+                                            style="font-size:0.78rem; padding:0.3rem 0.75rem;">
+                                        Save
+                                    </button>
+                                </form>
+                                <button onclick="showDenyForm(@order.Id)"
+                                        class="gb-btn gb-btn--outline"
+                                        style="font-size:0.78rem; padding:0.3rem 0.75rem; border-color:#e74c3c; color:#e74c3c;">
+                                    Deny Order
+                                </button>
+                                <div id="deny-form-@order.Id" style="display:none; margin-top:0.25rem;">
+                                    <form asp-action="DenyOrder" method="post">
+                                        <input type="hidden" name="orderId" value="@order.Id" />
+                                        <textarea name="denialReason" class="gb-input"
+                                                  placeholder="Reason for denial..."
+                                                  style="font-size:0.78rem; height:60px; resize:none; margin-bottom:0.3rem;"></textarea>
+                                        <button type="submit" class="gb-btn gb-btn--outline"
+                                                style="font-size:0.78rem; padding:0.3rem 0.75rem; border-color:#e74c3c; color:#e74c3c; width:100%;">
+                                            Confirm Denial
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <span style="font-size:0.78rem; color:var(--gb-muted);">@order.DenialReason</span>
+                        }
                     </td>
                 </tr>
             }
@@ -88,6 +117,11 @@ else
 
 @section Scripts {
     <script>
+        function showDenyForm(orderId) {
+            const form = document.getElementById('deny-form-' + orderId);
+            if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+
         const ROWS_PER_PAGE = 10;
         let currentPage = 1;
         let filteredRows = [];
@@ -164,7 +198,6 @@ else
 
         searchInput.addEventListener('input', applyFilters);
         statusFilter.addEventListener('change', applyFilters);
-
         applyFilters();
     </script>
 }

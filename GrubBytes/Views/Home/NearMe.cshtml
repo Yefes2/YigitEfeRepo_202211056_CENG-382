@@ -7,15 +7,18 @@
     <h1 class="gb-page-title">Caterers Near You</h1>
     <div style="display:flex; align-items:center; gap:1rem;">
         <label style="color:var(--gb-muted); font-size:0.875rem;">Max distance (km):</label>
-        <input type="number" id="maxDistance" value="10" min="1" max="100"
-               class="gb-input" style="width:80px;" onchange="filterByDistance()" />
+        <input type="number" id="maxDistance" value="300" min="1" max="500"
+               class="gb-input" style="width:80px;" />
+        <button onclick="filterByDistance()" class="gb-btn gb-btn--primary">Apply</button>
     </div>
 </div>
 
 <div style="display:grid; grid-template-columns:1fr 340px; gap:1.5rem; align-items:start;">
-    <div id="map" style="height:500px; border-radius:10px; border:1px solid var(--gb-border);"></div>
+    <div id="map" style="height:520px; border-radius:10px; border:1px solid var(--gb-border);"></div>
 
-    <div id="caterer-list"></div>
+    <div id="caterer-list"
+         style="height:520px; overflow-y:auto; display:flex; flex-direction:column; gap:0.75rem;">
+    </div>
 </div>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -33,7 +36,7 @@
     })));
 
     let userLat = null, userLng = null;
-    let map = L.map('map').setView([39.9334, 32.8597], 12);
+    let map = L.map('map').setView([39.9334, 32.8597], 9);
     let userMarker = null;
     let catererMarkers = [];
 
@@ -46,53 +49,63 @@
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLng = (lng2 - lng1) * Math.PI / 180;
     const a = Math.sin(dLat / 2) ** 2 +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng / 2) ** 2;
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
     function filterByDistance() {
-    const maxDist = parseFloat(document.getElementById('maxDistance').value);
+    const maxDist = parseFloat(document.getElementById('maxDistance').value) || 300;
     const list = document.getElementById('caterer-list');
     list.innerHTML = '';
     catererMarkers.forEach(m => map.removeLayer(m));
     catererMarkers = [];
 
-    caterers.forEach(c => {
+    const filtered = caterers.filter(c => {
+    if (userLat === null) return true;
+    const dist = haversine(userLat, userLng, c.lat, c.lng);
+    return dist <= maxDist;
+    });
+
+    if (filtered.length === 0) {
+    list.innerHTML = '<div class="gb-card" style="text-align:center; padding:2rem; color:var(--gb-muted);">No caterers found within range.</div>';
+    return;
+    }
+
+    filtered.forEach(c => {
     const dist = userLat !== null
     ? haversine(userLat, userLng, c.lat, c.lng).toFixed(1)
     : null;
-
-    if (dist !== null && parseFloat(dist) > maxDist) return;
 
     const marker = L.marker([c.lat, c.lng])
     .addTo(map)
     .bindPopup(`<b>${c.name}</b><br>${dist ? dist + ' km away' : ''}<br>${c.menuCount} items`);
     catererMarkers.push(marker);
 
-    list.innerHTML += `
-    <div class="gb-card" style="margin-bottom:1rem;">
-    <h3 style="font-family:var(--font-display); font-size:1.2rem;">${c.name}</h3>
-    <p style="color:var(--gb-muted); font-size:0.85rem; margin:0.25rem 0;">${c.description}</p>
-    ${dist ? `<p style="color:var(--gb-orange); font-size:0.82rem;">${dist} km away</p>` : ''}
-    <a href="/" class="gb-btn gb-btn--outline" style="margin-top:0.75rem; font-size:0.82rem;">
+    const card = document.createElement('div');
+    card.className = 'gb-card';
+    card.style.flexShrink = '0';
+    card.innerHTML = `
+    <h3 style="font-family:var(--font-display); font-size:1.1rem;">${c.name}</h3>
+    <p style="color:var(--gb-muted); font-size:0.82rem; margin:0.25rem 0;">${c.description}</p>
+    ${dist ? `<p style="color:var(--gb-orange); font-size:0.8rem;">${dist} km away</p>` : ''}
+    <a href="/Home/CatererProfile/${c.id}"
+    class="gb-btn gb-btn--outline"
+    style="margin-top:0.75rem; font-size:0.82rem; display:inline-block;">
     View Menu
-    </a>
-    </div>`;
+    </a>`;
+    list.appendChild(card);
     });
-
-    if (list.innerHTML === '')
-    list.innerHTML = '<div class="gb-card" style="text-align:center; padding:2rem; color:var(--gb-muted);">No caterers found within range.</div>';
     }
 
-    // Get user location
     if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(pos => {
     userLat = pos.coords.latitude;
     userLng = pos.coords.longitude;
-    map.setView([userLat, userLng], 13);
+    map.setView([userLat, userLng], 10);
     userMarker = L.marker([userLat, userLng], {
     icon: L.divIcon({
-    html: '<div style="background:#FF6B35; width:14px; height:14px; border-radius:50%; border:2px solid white;"></div>',
+    html: '<div style="background:#FF6B35;width:14px;height:14px;border-radius:50%;border:2px solid white;"></div>',
     iconSize: [14, 14]
     })
     }).addTo(map).bindPopup('You are here').openPopup();

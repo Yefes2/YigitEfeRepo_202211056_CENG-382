@@ -1,10 +1,10 @@
 ﻿@model IEnumerable<GrubBytes.Models.MenuItem>
 @{
-    ViewData["Title"] = "My Menu";
+    ViewData["Title"] = "Menu Management";
 }
 
 <div class="gb-page-header">
-    <h1 class="gb-page-title">My Menu</h1>
+    <h1 class="gb-page-title">Menu Management</h1>
     <a asp-action="CreateMenuItem" class="gb-btn gb-btn--primary">+ Add Item</a>
 </div>
 
@@ -21,6 +21,13 @@ else
 {
     <div class="gb-filter-bar">
         <input type="text" id="searchInput" class="gb-input" placeholder="Search by name..." />
+        <select id="districtFilter" class="gb-input">
+            <option value="">All Districts</option>
+            @foreach (var district in Model.Select(m => m.Caterer?.BusinessName).Distinct().OrderBy(x => x))
+            {
+                <option value="@district?.ToLower()">@district</option>
+            }
+        </select>
         <select id="statusFilter" class="gb-input">
             <option value="">All Statuses</option>
             <option value="Available">Available</option>
@@ -32,6 +39,7 @@ else
     <table class="gb-table" id="menuTable">
         <thead>
             <tr>
+                <th>District</th>
                 <th>Name</th>
                 <th>Description</th>
                 <th>Price</th>
@@ -40,12 +48,16 @@ else
             </tr>
         </thead>
         <tbody id="menuBody">
-            @foreach (var item in Model)
+            @foreach (var item in Model.OrderBy(m => m.Caterer?.BusinessName).ThenBy(m => m.Title))
             {
                 <tr data-name="@item.Title.ToLower()"
+                    data-district="@item.Caterer?.BusinessName?.ToLower()"
                     data-status="@(item.IsAvailable ? "Available" : "Unavailable")">
+                    <td style="color:var(--gb-orange); font-size:0.82rem; white-space:nowrap;">
+                        @item.Caterer?.BusinessName
+                    </td>
                     <td>@item.Title</td>
-                    <td>@item.Description</td>
+                    <td style="font-size:0.85rem; color:var(--gb-muted);">@item.Description</td>
                     <td>₺@item.Price.ToString("0.00")</td>
                     <td>
                         <span class="gb-badge @(item.IsAvailable ? "gb-badge--completed" : "gb-badge--cancelled")">
@@ -76,11 +88,12 @@ else
 
 @section Scripts {
     <script>
-        const ROWS_PER_PAGE = 8;
+        const ROWS_PER_PAGE = 10;
         let currentPage = 1;
         let filteredRows = [];
 
         const searchInput = document.getElementById('searchInput');
+        const districtFilter = document.getElementById('districtFilter');
         const statusFilter = document.getElementById('statusFilter');
         const allRows = Array.from(document.querySelectorAll('#menuBody tr'));
         const noResults = document.getElementById('noResults');
@@ -89,12 +102,14 @@ else
 
         function applyFilters() {
             const search = searchInput.value.toLowerCase().trim();
+            const district = districtFilter.value.toLowerCase();
             const status = statusFilter.value;
 
             filteredRows = allRows.filter(row => {
                 const nameMatch = row.dataset.name.includes(search);
+                const districtMatch = !district || row.dataset.district.includes(district);
                 const statusMatch = !status || row.dataset.status === status;
-                return nameMatch && statusMatch;
+                return nameMatch && districtMatch && statusMatch;
             });
 
             currentPage = 1;
@@ -151,8 +166,8 @@ else
         }
 
         searchInput.addEventListener('input', applyFilters);
+        districtFilter.addEventListener('change', applyFilters);
         statusFilter.addEventListener('change', applyFilters);
-
         applyFilters();
     </script>
 }
