@@ -523,3 +523,98 @@ END;
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260516175133_AllowMultipleCatererProfiles'
+)
+BEGIN
+    DROP INDEX [IX_CatererProfiles_UserId] ON [CatererProfiles];
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260516175133_AllowMultipleCatererProfiles'
+)
+BEGIN
+    ALTER TABLE [CatererProfiles] ADD [ApplicationUserId] nvarchar(450) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260516175133_AllowMultipleCatererProfiles'
+)
+BEGIN
+    CREATE INDEX [IX_CatererProfiles_ApplicationUserId] ON [CatererProfiles] ([ApplicationUserId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260516175133_AllowMultipleCatererProfiles'
+)
+BEGIN
+    CREATE INDEX [IX_CatererProfiles_UserId] ON [CatererProfiles] ([UserId]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260516175133_AllowMultipleCatererProfiles'
+)
+BEGIN
+    ALTER TABLE [CatererProfiles] ADD CONSTRAINT [FK_CatererProfiles_AspNetUsers_ApplicationUserId] FOREIGN KEY ([ApplicationUserId]) REFERENCES [AspNetUsers] ([Id]);
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260516175133_AllowMultipleCatererProfiles'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260516175133_AllowMultipleCatererProfiles', N'10.0.7');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260517072610_AddDenialReason'
+)
+BEGIN
+    ALTER TABLE [Orders] ADD [DenialReason] nvarchar(max) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260517072610_AddDenialReason'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260517072610_AddDenialReason', N'10.0.7');
+END;
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260517075726_AddProfileImage'
+)
+BEGIN
+    ALTER TABLE [AspNetUsers] ADD [ProfileImagePath] nvarchar(max) NULL;
+END;
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260517075726_AddProfileImage'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260517075726_AddProfileImage', N'10.0.7');
+END;
+
+COMMIT;
+GO
+
